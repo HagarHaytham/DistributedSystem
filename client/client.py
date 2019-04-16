@@ -21,20 +21,23 @@ if len(sys.argv) > 2:
 
 #  Do request, waiting for a response
 
-print ("Waiting request... Choose 1-update 2-show 3-download")
+print ("Waiting request... Choose 1-Upload 2-Show 3-Download")
 
 read = input()
-while(read.find("Upload") == -1):
-    print ("Choose 'Upload' or 'show'")
+#time.sleep(1)
+while(read != "1" and read != "2" and read != "3"):
+    print ("please, Choose 1-Upload 2-Show 3-Download")
     read = input()
     
-socket.send_string(read)
-print ("Sending request...")
-#time.sleep (1) 
+if(read=="1"):
+    socket.send_string(read)
+    print ("Sending request...")
+    time.sleep(1)
+ 
 
 #  Get the port.
 message = socket.recv_string()
-
+time.sleep(1)
 print ("Received port ", message)
 
 ##################################################################
@@ -50,9 +53,12 @@ f = open(file,'rb')
 print ('Sending...')
 l = f.read()
 socket1.send(l)
-
+time.sleep(1)
 f.close()
-print ("Done Sending")
+#print ("Done Sending")
 
-print (socket1.recv())
+print (socket1.recv_string())
+time.sleep(1)
+socket1.send_string("Done Receiving")
+time.sleep(1)
 socket1.close()

@@ -55,11 +55,13 @@ while True:
     #  Wait for next request from client
     message = socket.recv_string()
     print ("Received request: ", message)
-    
+    time.sleep(1)
     print ("Finding available ports... ")
     
     msg = str(message)
-    if msg.find("Upload") != -1:
+    
+   
+    if(msg == "1"):
         n= []
         
         for i in range(len(LookUpTable)):
@@ -90,7 +92,8 @@ while True:
             j+=1
             
         socket.send_string(res)
-        print ("Sending Reply... ")
+        time.sleep(1)
+        print ("Reply is sent... ")
    
 
 

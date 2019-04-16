@@ -21,13 +21,17 @@ print ("connecting to client...")
 
 f = open('file.mp4','wb')
 
-while True:
+#while True:
     
-    print ("Receiving...")
-    l = socket.recv()
-    f.write(l)
-    f.close()
-    #time.sleep(10)
-    print ("Done Receiving")
-    socket.send_string('Thank you for connecting')
-    #socket.close()                # Close the connection
+l = socket.recv()
+print ("Receiving...")
+time.sleep(1)
+f.write(l)
+f.close()
+#time.sleep(10)
+#print ("Done Receiving")
+socket.send_string('Done Sending')
+time.sleep(1)
+print(socket.recv_string())
+time.sleep(1)
+socket.close()                # Close the connection
