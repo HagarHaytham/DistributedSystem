@@ -48,7 +48,8 @@ socket1.connect ("tcp://localhost:%s" % message)
 
 print ("connecting to process...Enter your file") 
 file=input()
-
+socket1.send_string(file)
+time.sleep(1)
 f = open(file,'rb')
 print ('Sending...')
 l = f.read()
@@ -61,4 +62,17 @@ print (socket1.recv_string())
 time.sleep(1)
 socket1.send_string("Done Receiving")
 time.sleep(1)
-socket1.close()
+
+
+#rec from master success
+print(socket.recv_string())
+time.sleep(1)
+#socket1.close()
+
+
+
+
+
+
+
+
