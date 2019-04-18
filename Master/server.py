@@ -31,6 +31,8 @@ LookUpTable[0]=node
 LookUpTable[1]=node1
 LookUpTable[2]=node2
 
+
+#array nodes and processes
 Nports = [[["1100",'Y','A'],["2000",'N','A'],["3000",'N','A']],[["4000",'N','A'],["5000",'Y'],["600",'Y','A']],[["700",'Y','A'],["800",'Y','A'],["900",'Y','A']]]
 
 #def pickNode():
@@ -44,17 +46,16 @@ k=random.choice(n)
 #print(LookUpTable)
 
 def Nodes():
-    
+    #i=0
+    while 1:
      #connecting to Nodes
-    print("heeeeeeeeeeeeeeeelp")
-    
-    print(socket1.recv_string())
-    #print("recieved ",string )
-    time.sleep(1)
-    #topic, IP = string.split()
-    #total_value += int(messagedata)
-    #print (topic, IP)
-    
+        socket1.setsockopt_string(zmq.SUBSCRIBE, "ALIVE")
+        string = socket1.recv_string()
+        #print("recieved ",string )
+        time.sleep(1)
+        topic, IP = string.split()
+        print (topic, IP)
+        #i+=1
    
     
 
@@ -62,40 +63,36 @@ def Nodes():
     
 def client():
     #  Wait for next request from client
-    message = ""
-    message = socket.recv_string()
-    print ("Received request: ", message)
-    time.sleep(1)
-    print ("Finding available ports... ")
-    
-    msg = str(message)
-    
-    if(msg == "1"):
-#        n= []
-#        for i in range(len(LookUpTable)):
-#            if LookUpTable[i][1] == 'Y':
-#                n.append(i)
-        #pick machine random and choose first port alive
-        res = ""
-        j=0
-#        k=random.choice(n)
-        while (res=="" and j in range(len(Nports[k]))):
-            if Nports[k][j][1] == 'Y':
-                res = Nports[k][j][0]
-            j+=1
-        #set busy
-        #Nports[k][j-1][2]= 'B'
-        
-        socket.send_string(res)
+    while(1):
+        message = ""
+        message = socket.recv_string()
+        print ("Received request: ", message)
         time.sleep(1)
-        print ("Reply is sent... ")
+        print ("Finding available ports... ")
+        
+        msg = str(message)
+        
+        if(msg == "1"):
+ 
+            #pick machine random and choose first port alive
+            res = ""
+            j=0
+ 
+            while (res=="" and j in range(len(Nports[k]))):
+                if Nports[k][j][1] == 'Y':
+                    res = Nports[k][j][0]
+                j+=1
+            #set busy
+            #Nports[k][j-1][2]= 'B'
+            
+            socket.send_string(res)
+            time.sleep(1)
+            print ("Reply is sent... ")
         
         
 def success():        
-    #send success to client
-    socket.send_string("success uploading")
     
-    #recived success from node 
+     #recived success from node 
     print(socket1.recv_string())
     time.sleep(1)
     fileName= socket1.recv_string()
@@ -103,6 +100,11 @@ def success():
     
     LookUpTable[k][0][100].append(fileName)
     print(LookUpTable[k][0][100])
+    
+    #send success to client
+    socket.send_string("success uploading")
+    
+   
 
 
 ###################################################
@@ -126,26 +128,30 @@ if __name__ == "__main__":
         
     print("conecting to nodes...")
     socket1.connect ("tcp://localhost:%s" % port1)
-    socket1.setsockopt_string(zmq.SUBSCRIBE, "ALIVE")
+    
     
     # creating thread 
     t1 = threading.Thread(target=Nodes) 
     t2 = threading.Thread(target=client) 
-  
+    t3 = threading.Thread(target=success)
     
     #while True:
         # starting thread 1 
     t2.start() 
     # starting thread 2 
     t1.start() 
-    while(1):
+    
+    
+    
+    
     #Nodes()
     # wait until thread 1 is completely executed 
-        t2.join()
-        t1.join()
+    #t2.join()
+    t3.start()
+        #t1.join()
     #success()
      # both threads completely executed 
-        #print("Done!")
+    print("Done!")
 
 #if len(sys.argv) > 2:
  #   socket1.connect ("tcp://localhost:%s" % port1)
