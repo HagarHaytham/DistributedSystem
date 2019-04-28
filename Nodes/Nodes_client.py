@@ -10,11 +10,11 @@ import sys
 import socket
 import threading
 
-
+file = ""
 
 
 def alive():
-    #i=0
+#    i=0
     while (1):
         topicfilter = socket.gethostbyname(socket.gethostname())
         topicfilter+= "@" + port1
@@ -22,7 +22,7 @@ def alive():
         serverSocket.send_string("%s %s" % (messagedata, topicfilter))
         time.sleep(1)
         print(topicfilter)
-        #i+=1
+#        i+=1
 
 def upload():
     print ("Receiving...")
@@ -39,13 +39,19 @@ def upload():
     
     
 def success():
-    topicfilter = "Success"
-    serverSocket.send_string("%s %s" % (topicfilter,msg ))
+#    while 1:
+    msg="Uploaded Successfully"
+    serverSocket1.send_string(msg)
+    
+    time.sleep(1)
+    print(msg)
+#    serverSocket.send_string("%s %s" % (topic,file ))
+    #print(msg)
     
 if __name__ == "__main__":
     
     
-    port = "777"
+    port = "2000"
     if len(sys.argv) > 1:
         port =  sys.argv[1]
         int(port)
@@ -61,7 +67,15 @@ if __name__ == "__main__":
     port1 = "5555"
     serverSocket = context.socket(zmq.PUB)
     serverSocket.bind("tcp://*:%s" % port1)
-    print ("connecting to Nodes...")
+    print ("connecting to Server...")
+    
+    ####################################
+    
+    #to send success to server
+    portz= "1077"
+#    while 1:
+    serverSocket1 = context.socket(zmq.REQ)
+    serverSocket1.connect("tcp://localhost:%s" % portz)
     
     ####################################
     

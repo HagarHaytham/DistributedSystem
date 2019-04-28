@@ -41,7 +41,17 @@ print ("Received port ", message)
 #connect to process with given port and upload file
 
 socket1 = context.socket(zmq.REQ)
-socket1.connect ("tcp://localhost:%s" % message)
+#socket1.connect ("tcp://localhost:%s" % message)
+socket1.connect ("tcp://localhost:%s" % "2000")
+
+
+##################################################################
+#connect to server to recieve success uploading
+socketServer = context.socket(zmq.REQ)
+#socket1.connect ("tcp://localhost:%s" % message)
+socketServer.connect ("tcp://localhost:%s" % "1088")
+
+##################################################################
 
 print ("connecting to process...Enter your file") 
 file=input()
@@ -57,6 +67,9 @@ print ("Done Sending")
 print (socket1.recv())
 #sending file name
 socket1.send_string(file)
+time.sleep(1)
 #recieving success from srver
-print(socket.recv_string())
+
+print(socketServer.recv_string())
+time.sleep(1)
 #socket1.close()
