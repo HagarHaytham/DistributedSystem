@@ -24,27 +24,34 @@ if len(sys.argv) > 2:
 print ("Waiting request... Choose 1-Upload 2-Show 3-Download")
 
 read = input()
-#time.sleep(1)
-while(read != "1" and read != "2" and read != "3"):
-    print ("please, Choose 1-Upload 2-Show 3-Download")
-    read = input()
+#while(read.find("Upload") == -1):
+#    print ("Choose 'Upload' or 'show'")
+#    read = input()
     
-if(read=="1"):
-    socket.send_string(read)
-    print ("Sending request...")
-    time.sleep(1)
- 
+socket.send_string(read)
+print ("Sending request...")
+#time.sleep (1) 
 
 #  Get the port.
 message = socket.recv_string()
-time.sleep(1)
+
 print ("Received port ", message)
 
 ##################################################################
 #connect to process with given port and upload file
 
 socket1 = context.socket(zmq.REQ)
-socket1.connect ("tcp://localhost:%s" % message)
+#socket1.connect ("tcp://localhost:%s" % message)
+socket1.connect ("tcp://localhost:%s" % "2000")
+
+
+##################################################################
+#connect to server to recieve success uploading
+socketServer = context.socket(zmq.REQ)
+#socket1.connect ("tcp://localhost:%s" % message)
+socketServer.connect ("tcp://localhost:%s" % "1088")
+
+##################################################################
 
 print ("connecting to process...Enter your file") 
 file=input()
@@ -53,12 +60,16 @@ f = open(file,'rb')
 print ('Sending...')
 l = f.read()
 socket1.send(l)
-time.sleep(1)
-f.close()
-#print ("Done Sending")
 
-print (socket1.recv_string())
+f.close()
+print ("Done Sending")
+
+print (socket1.recv())
+#sending file name
+socket1.send_string(file)
 time.sleep(1)
-socket1.send_string("Done Receiving")
+#recieving success from srver
+
+print(socketServer.recv_string())
 time.sleep(1)
-socket1.close()
+#socket1.close()

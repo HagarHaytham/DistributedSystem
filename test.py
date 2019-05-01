@@ -8,37 +8,38 @@ Created on Mon Apr 15 14:40:35 2019
 import zmq
 import sys
 import time
+import socket
 
-
-context = zmq.Context()
-message="700"
-print ("Received port ", message)
-
-
-socket1 = context.socket(zmq.REQ)
-socket1.connect ("tcp://localhost:%s" % message)
-
-print ("connecting to process...Enter your file") 
-file=input()
-
-f = open(file,'rb')
-print ('Sending...')
-l = f.read()
-#while (l):
- #   print ('Sending...')
-socket1.send(l)
-#time.sleep(10)
-#    l = f.read(1024)
+#
+#context = zmq.Context()
+#message="700"
+#print ("Received port ", message)
+#
+#
+#socket1 = context.socket(zmq.REQ)
+#socket1.connect ("tcp://localhost:%s" % message)
+#
+#print ("connecting to process...Enter your file") 
+#file=input()
+#
+#f = open(file,'rb')
+#print ('Sending...')
+#l = f.read()
+##while (l):
+# #   print ('Sending...')
 #socket1.send(l)
-f.close()
-print ("Done Sending")
-#socket1.shutdown(socket1.SHUT_WR)
-print (socket1.recv())
-socket1.close()
+##time.sleep(10)
+##    l = f.read(1024)
+##socket1.send(l)
+#f.close()
+#print ("Done Sending")
+##socket1.shutdown(socket1.SHUT_WR)
+#print (socket1.recv())
+#socket1.close()
 
 
 
-
+print(socket.gethostbyname(socket.gethostname()))
 
 
 '''ports=[]

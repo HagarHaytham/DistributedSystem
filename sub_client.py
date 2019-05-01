@@ -1,5 +1,6 @@
 import sys
 import zmq
+import socket
 
 port = "5556"
 if len(sys.argv) > 1:
@@ -10,29 +11,34 @@ if len(sys.argv) > 2:
     port1 =  sys.argv[2]
     int(port1)
 
+#####MASTERRRRR#############
+
+
 # Socket to talk to server
 context = zmq.Context()
-socket = context.socket(zmq.SUB)
+socket1 = context.socket(zmq.SUB)
 
 print("Collecting updates from weather server...")
-socket.connect ("tcp://localhost:%s" % port)
+socket1.connect ("tcp://localhost:%s" % port)
 
 if len(sys.argv) > 2:
-    socket.connect ("tcp://localhost:%s" % port1)
+    socket1.connect ("tcp://localhost:%s" % port1)
+
 
 # Subscribe to zipcode, default is NYC, 10001
-topicfilter = 10001
-socket.setsockopt_string(zmq.SUBSCRIBE, '10001')
+#messagedata = socket1.gethostbyname(socket.gethostname())
+#messagedata+= " " + port
+socket1.setsockopt_string(zmq.SUBSCRIBE, "ALIVE")
 
 # Process 5 updates
 total_value = 0
-for update_nbr in range (5):
-    string = socket.recv()
-    topic, messagedata = string.split()
-    total_value += int(messagedata)
-    print (topic, messagedata)
+while(1):
+    string = socket1.recv()
+    topic, IP = string.split()
+    #total_value += int(messagedata)
+    print (topic, IP)
 
-print ("Average messagedata value for topic '%s' was %dF" % (topicfilter, total_value / update_nbr))
+#print ("Average messagedata value for topic '%s' was %dF" % (topicfilter, total_value / update_nbr))
       
 
 

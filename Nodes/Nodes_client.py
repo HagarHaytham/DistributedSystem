@@ -7,31 +7,91 @@ Created on Mon Apr 15 22:17:55 2019
 import zmq
 import time
 import sys
+import socket
+import threading
+
+file = ""
 
 
-port = "777"
-if len(sys.argv) > 1:
-    port =  sys.argv[1]
-    int(port)
-context = zmq.Context()
-socket = context.socket(zmq.REP)
-socket.bind("tcp://*:%s" % port)
+def alive():
+#    i=0
+    while (1):
+        topicfilter = socket.gethostbyname(socket.gethostname())
+        topicfilter+= "@" + port1
+        messagedata = "ALIVE"
+        serverSocket.send_string("%s %s" % (messagedata, topicfilter))
+        time.sleep(1)
+        print(topicfilter)
+#        i+=1
 
-print ("connecting to client...")
-
-f = open('file.mp4','wb')
-
-#while True:
+def upload():
+    print ("Receiving...")
+    l = clientSocket.recv()
+    f.write(l)
+    f.close()
+    #time.sleep(10)
+    print ("Done Receiving")
+    clientSocket.send_string('Thank you for connecting') 
+    file= clientSocket.recv_string()
+    print("recieved file name ",file)
+    serverSocket.send_string("Success uploading.")
+    serverSocket.send_string(file)
     
-l = socket.recv()
-print ("Receiving...")
-time.sleep(1)
-f.write(l)
-f.close()
-#time.sleep(10)
-#print ("Done Receiving")
-socket.send_string('Done Sending')
-time.sleep(1)
-print(socket.recv_string())
-time.sleep(1)
-socket.close()                # Close the connection
+    
+def success():
+#    while 1:
+    msg="Uploaded Successfully"
+    serverSocket1.send_string(msg)
+    
+    time.sleep(1)
+    print(msg)
+#    serverSocket.send_string("%s %s" % (topic,file ))
+    #print(msg)
+    
+if __name__ == "__main__":
+    
+    
+    port = "2000"
+    if len(sys.argv) > 1:
+        port =  sys.argv[1]
+        int(port)
+    context = zmq.Context()
+    clientSocket = context.socket(zmq.REP)
+    clientSocket.bind("tcp://*:%s" % port)
+    
+    print ("connecting to client...")
+    
+    
+    #####################################
+    
+    port1 = "5555"
+    serverSocket = context.socket(zmq.PUB)
+    serverSocket.bind("tcp://*:%s" % port1)
+    print ("connecting to Server...")
+    
+    ####################################
+    
+    #to send success to server
+    portz= "1077"
+#    while 1:
+    serverSocket1 = context.socket(zmq.REQ)
+    serverSocket1.connect("tcp://localhost:%s" % portz)
+    
+    ####################################
+    
+    f = open('file.mp4','wb')
+    
+    #while True:
+    t1 = threading.Thread(target=upload) 
+    t2 = threading.Thread(target=alive)
+    t3 = threading.Thread(target=success)
+    
+    t1.start()
+    t2.start()
+    
+    t1.join()
+    
+    t3.start()
+    
+    
+   
