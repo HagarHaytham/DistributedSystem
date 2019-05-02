@@ -31,15 +31,13 @@ while True:
     print(query)
     if (query[0] =='1'): # Sign Up
         sqlcheck = "SELECT * FROM USERS where Username= %s"
-        cursor.execute(sqlcheck,(query[1],)  )
+        cursor.execute(sqlcheck,(query[1],))
         result = cursor.fetchall()
         print(result)
         if len(result)>0:
-            print("NOOO")
             messageToSend = "Can't sign Up with this Username , please choose another One"
-        else:
-            
-            sql ="INSERT INTO USERS (UserName,Email, UserPassword) VALUES ( %s , %s ,%s )"
+        else:            
+            sql ="INSERT INTO USERS (UserName,UserPassword,Email) VALUES ( %s , %s ,%s )"
             try:
                # Execute the SQL command
                cursor.execute(sql,(query[1],query[2],query[3],))
@@ -51,9 +49,14 @@ while True:
             messageToSend = "Signed in Sucessfully"
     else: #log in
         print("Log in")
-    
-    
-    #    msg = str(message,'utf-8')#+ str(port)
+        sql = "SELECT * FROM USERS where Username= %s and UserPassword = %s"
+        cursor.execute(sql,(query[1],query[2],))
+        result = cursor.fetchall()
+        if len(result) ==0:
+            messageToSend = "Username or password is incorrect, Please try again"
+        else:
+            messageToSend="Logged in Sucessfully"
+
     socket.send_string(messageToSend)
 
 

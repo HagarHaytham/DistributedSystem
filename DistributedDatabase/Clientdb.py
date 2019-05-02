@@ -72,11 +72,13 @@ while Error == True:
     message = socket[shard].recv()
         
     print ("Received reply of request ,recieved ", message)
+    ###### get response from that server
+
     RecievedMsg = str(message,'utf-8')
-    if (RecievedMsg == "Signed in Sucessfully"):
+    if (RecievedMsg == "Signed in Sucessfully" or RecievedMsg=="Logged in Sucessfully"):
         Error = False
      
-###### get response from that server
      
      
 ##### if authenticated let it talk to the master tracker
+        
