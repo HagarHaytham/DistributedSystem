@@ -19,10 +19,33 @@ cursor = db.cursor()
 
 
 port=int(sys.argv[1])
+firstPortSecondShard = int (sys.argv[2])
+firstPortThirdShard = int (sys.argv[3])
+mysub=[]
+for i in range (3):
+    mysub.append(firstPortSecondShard+i)
+    mysub.append(firstPortThirdShard+i)
 
+### server connection with client
 context = zmq.Context()
 socket = context.socket(zmq.REP)
 socket.bind("tcp://*:%s" % port)
+
+### publisher connection with my subsribers
+contextPub = zmq.Context()
+socketPub = contextPub.socket(zmq.PUB)
+for i in range(len(mysub)):
+    socketPub.bind("tcp://*:%s" % mysub[i])
+
+### subsriber connection with my subscribers(in this case they are the publishers)
+contextSub = zmq.Context()
+socketSub = contextSub.socket(zmq.SUB)
+for i in range (len(mysub)): 
+    socketSub.connect ("tcp://localhost:%s" % mysub[i])
+    topicfilter = "Insert"
+    socketSub.setsockopt_string(zmq.SUBSCRIBE, topicfilter)
+
+
 insertion = False
 while True:
     message = socket.recv()
@@ -44,7 +67,10 @@ while True:
                cursor.execute(sql,(query[1],query[2],query[3],))
                # Commit your changes in the database
                db.commit()
-               insertion = True
+               ### then publish that if it is an insertion
+               topic = "Insert"
+               messagedata = "INSERT INTO USERS (UserName,UserPassword,Email) VALUES ( "+query[1]+" , "+query[2]+" , " +query[3] + " )"
+               socket.send_string("%d %d" % (topic, messagedata))
             except:
                # Rollback in case there is any error
                db.rollback()
@@ -58,20 +84,24 @@ while True:
             messageToSend = "Username or password is incorrect, Please try again"
         else:
             messageToSend="Logged in Sucessfully"
-    ### then publish that if it is an insertion
-#    if insertion == True:
         
     socket.send_string(messageToSend)
 
 
-# disconnect from server
-db.close()
-
-
-
-
-### then publish that if it is an insertion
-
 
 ### subscribe to other machines to get new updates
+    string = socketSub.recv()
+    topic, messagedata = string.split()
+    print (messagedata) ## sql query to be executed
+    try:
+           # Execute the SQL command
+           cursor.execute(sql,(query[1],query[2],query[3],))
+           # Commit your changes in the database
+           db.commit()
+    except:
+           # Rollback in case there is any error
+           db.rollback()
 
+
+# disconnect from server
+#db.close()
