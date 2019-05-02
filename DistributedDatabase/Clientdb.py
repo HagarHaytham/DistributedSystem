@@ -10,83 +10,71 @@ import getpass  # for password to be invisible
 import zmq
 import sys
 #import tim
-#port=[]
-#for i in range(1,len(sys.argv)):
-#    port.append(int(sys.argv[i]))
-
-port1=int(sys.argv[1])
-port2=int(sys.argv[2])
-port3=int(sys.argv[3])
-
-context1 = zmq.Context()
-print ("Connecting to server(s) of machine 1...")
-socket1 = context1.socket(zmq.REQ)
-socket1.connect ("tcp://localhost:%s" % port1)
-
-context2 = zmq.Context()
-print ("Connecting to server(s) of machine 2...")
-socket2 = context2.socket(zmq.REQ)
-socket2.connect ("tcp://localhost:%s" % port2)
-
-context3 = zmq.Context()
-print ("Connecting to server(s) of machine 3...")
-socket3 = context3.socket(zmq.REQ)
-socket3.connect ("tcp://localhost:%s" % port3)
+portsbegin=[5000,5005,5010] # shard 1 begins from port 5000 , shard 2 begins from 5005 and shard 3 from 5010
+port=[]
+context =[]
+socket=[] 
+    
+for i in range (3): # 3 shards
+    port.append([])
+    for j in range (3): # 3 processes for each shard
+        port[i].append( portsbegin[i]+j)
 
 
-
-
+for i in range (3): # 3 shards
+    context.append(zmq.Context())
+    print ("Connecting to server(s) of machine %s...",i)
+    socket.append(context[i].socket(zmq.REQ))
+    for j in range (3): # 3 processes for each shard
+        socket[i].connect ("tcp://localhost:%s" % port[i][j])
+        
 ####Letters for each machine(shard)
 Listm1 =['j','s','b','w','f','g','q','u']
 Listm2 =['m','c','l','e','t','p','i','n']
 Listm3 =['r','d','a','k','h','o','v','x','y','z']
-
-####### take the command from user
-mode = input("To Sign Up type 1 and to log in choose 2\n")
-while(mode != "1" and mode != "2"):
+Error = True
+while Error == True:
+    ####### take the command from user
     mode = input("To Sign Up type 1 and to log in choose 2\n")
-
-##### ADD CHECKS ON INPUT!!!!
-username = input('Enter Username(Username MUST begin with letter):')
-while not(username[0].isalpha()):
+    while(mode != "1" and mode != "2"):
+        mode = input("To Sign Up type 1 and to log in choose 2\n")
+    
+    ##### ADD CHECKS ON INPUT!!!!
     username = input('Enter Username(Username MUST begin with letter):')
-Password = getpass.getpass('Enter Password:') 
-
-####### Construct the message
-msg=mode+" " +username+" "+ Password+" "
-if (mode =="1"):  # sign up
-    ## new user so check if user name exists
-     Email = input('Enter Email:')
-     msg +=Email
-     
-#else: # log in
-     
+    while not(username[0].isalpha()):
+        username = input('Enter Username(Username MUST begin with letter):')
+    Password = getpass.getpass('Enter Password:') 
     
-####### (pick server to assign this task for)
-     
-if username[0] in Listm1 :
-    shard=1
-elif username[0] in Listm2 :
-    shard=2
-else:
-    shard=3
-
-
-#while True:
+    ####### Construct the message
+    msg=mode+" " +username+" "+ Password+" "
+    if (mode =="1"):  # sign up
+        ## new user so check if user name exists
+         Email = input('Enter Email:')
+         msg +=Email
+         
+    #else: # log in
+         
+        
+    ####### (pick server to assign this task for)
+         
+    if username[0] in Listm1 :
+        shard=0
+    elif username[0] in Listm2 :
+        shard=1
+    else:
+        shard=2
     
-print ("Sending request ")
-if (shard==1):
-    socket1.send_string(msg)
-    message = socket1.recv()
-elif (shard==2):
-    socket2.send_string(msg)
-    message = socket2.recv()
-else:
-    socket3.send_string(msg)
-    message = socket3.recv()
     
-print ("Received reply of request ,recieved ", message)
-
+    #while True:
+        
+    print ("Sending request ")
+    socket[shard].send_string(msg)
+    message = socket[shard].recv()
+        
+    print ("Received reply of request ,recieved ", message)
+    RecievedMsg = str(message,'utf-8')
+    if (RecievedMsg == "Signed in Sucessfully"):
+        Error = False
      
 ###### get response from that server
      

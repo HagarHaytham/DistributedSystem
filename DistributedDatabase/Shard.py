@@ -23,37 +23,38 @@ port=int(sys.argv[1])
 context = zmq.Context()
 socket = context.socket(zmq.REP)
 socket.bind("tcp://*:%s" % port)
-#while True:
-message = socket.recv()
-print ("Received request: ", message)    
-msg = str(message,'utf-8')
-query = msg.split()
-print(query)
-if (query[0] =='1'): # Sign Up
-    sqlcheck = "SELECT * FROM USERS where Username= %s"
-    cursor.execute(sqlcheck,(query[1],)  )
-    result = cursor.fetchall()
-    print(result)
-    if len(result)>0:
-        print("NOOO")
-        messageToSend = "Can't sign Up with this Username , please choose another One"
-    else:
-        
-        sql ="INSERT INTO USERS (UserName,Email, UserPassword) VALUES ( %s , %s ,%s )"
-        try:
-           # Execute the SQL command
-           cursor.execute(sql,(query[1],query[2],query[3],))
-           # Commit your changes in the database
-           db.commit()
-        except:
-           # Rollback in case there is any error
-           db.rollback()
-        messageToSend = "Signed in Sucessfully"
-
-
-
-#    msg = str(message,'utf-8')#+ str(port)
-socket.send_string(messageToSend)
+while True:
+    message = socket.recv()
+    print ("Received request: ", message)    
+    msg = str(message,'utf-8')
+    query = msg.split()
+    print(query)
+    if (query[0] =='1'): # Sign Up
+        sqlcheck = "SELECT * FROM USERS where Username= %s"
+        cursor.execute(sqlcheck,(query[1],)  )
+        result = cursor.fetchall()
+        print(result)
+        if len(result)>0:
+            print("NOOO")
+            messageToSend = "Can't sign Up with this Username , please choose another One"
+        else:
+            
+            sql ="INSERT INTO USERS (UserName,Email, UserPassword) VALUES ( %s , %s ,%s )"
+            try:
+               # Execute the SQL command
+               cursor.execute(sql,(query[1],query[2],query[3],))
+               # Commit your changes in the database
+               db.commit()
+            except:
+               # Rollback in case there is any error
+               db.rollback()
+            messageToSend = "Signed in Sucessfully"
+    else: #log in
+        print("Log in")
+    
+    
+    #    msg = str(message,'utf-8')#+ str(port)
+    socket.send_string(messageToSend)
 
 
 # disconnect from server
@@ -65,5 +66,5 @@ db.close()
 ### then publish that if it is an insertion
 
 
-    ### subscribe to other machines to get new updates
+### subscribe to other machines to get new updates
 
