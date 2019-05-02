@@ -23,6 +23,7 @@ port=int(sys.argv[1])
 context = zmq.Context()
 socket = context.socket(zmq.REP)
 socket.bind("tcp://*:%s" % port)
+insertion = False
 while True:
     message = socket.recv()
     print ("Received request: ", message)    
@@ -43,6 +44,7 @@ while True:
                cursor.execute(sql,(query[1],query[2],query[3],))
                # Commit your changes in the database
                db.commit()
+               insertion = True
             except:
                # Rollback in case there is any error
                db.rollback()
@@ -56,7 +58,9 @@ while True:
             messageToSend = "Username or password is incorrect, Please try again"
         else:
             messageToSend="Logged in Sucessfully"
-
+    ### then publish that if it is an insertion
+#    if insertion == True:
+        
     socket.send_string(messageToSend)
 
 
