@@ -20,38 +20,33 @@ if len(sys.argv) > 2:
     socket.connect ("tcp://localhost:%s" % port1)
 
 #  Do request, waiting for a response
-
 print ("Waiting request... Choose 1-Upload 2-Show 3-Download")
 
 read = input()
-#while(read.find("Upload") == -1):
-#    print ("Choose 'Upload' or 'show'")
-#    read = input()
-    
+#send the option to server    
 socket.send_string(read)
 print ("Sending request...")
-#time.sleep (1) 
 
-#  Get the port.
+#  Get the port from server
 message = socket.recv_string()
 
 print ("Received port ", message)
 
 ##################################################################
-#connect to process with given port and upload file
+#connect to node/process with given port to upload file
 
 socket1 = context.socket(zmq.REQ)
-#socket1.connect ("tcp://localhost:%s" % message)
 socket1.connect ("tcp://localhost:%s" % "2000")
 
 
 ##################################################################
 #connect to server to recieve success uploading
-socketServer = context.socket(zmq.REQ)
-#socket1.connect ("tcp://localhost:%s" % message)
-socketServer.connect ("tcp://localhost:%s" % "1088")
+socketServer = context.socket(zmq.REP)
+portx = "1088"
+socketServer.bind ("tcp://*:%s" % portx)
 
 ##################################################################
+#uploading happens
 
 print ("connecting to process...Enter your file") 
 file=input()
@@ -59,17 +54,17 @@ file=input()
 f = open(file,'rb')
 print ('Sending...')
 l = f.read()
+#sending video
 socket1.send(l)
 
 f.close()
 print ("Done Sending")
-
+#recieve complete
 print (socket1.recv())
 #sending file name
 socket1.send_string(file)
 time.sleep(1)
-#recieving success from srver
-
+#recieving success from server
 print(socketServer.recv_string())
-time.sleep(1)
+
 #socket1.close()

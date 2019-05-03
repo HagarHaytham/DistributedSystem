@@ -34,9 +34,7 @@ def upload():
     clientSocket.send_string('Thank you for connecting') 
     file= clientSocket.recv_string()
     print("recieved file name ",file)
-    serverSocket.send_string("Success uploading.")
-    serverSocket.send_string(file)
-    
+
     
 def success():
 #    while 1:
@@ -45,8 +43,7 @@ def success():
     
     time.sleep(1)
     print(msg)
-#    serverSocket.send_string("%s %s" % (topic,file ))
-    #print(msg)
+
     
 if __name__ == "__main__":
     
@@ -73,7 +70,6 @@ if __name__ == "__main__":
     
     #to send success to server
     portz= "1077"
-#    while 1:
     serverSocket1 = context.socket(zmq.REQ)
     serverSocket1.connect("tcp://localhost:%s" % portz)
     

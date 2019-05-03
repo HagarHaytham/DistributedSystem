@@ -45,8 +45,8 @@ k=random.choice(n)
     
 #print(LookUpTable)
 
+#############################################################
 def Nodes():
-#    i=0
     while 1:
      #connecting to Nodes
         socketNode.setsockopt_string(zmq.SUBSCRIBE, "ALIVE")
@@ -55,12 +55,8 @@ def Nodes():
         time.sleep(1)
         topic, IP = string.split()
         print (topic, IP)
-#        i+=1
-   
-    
 
-
-    
+#############################################################
 def client():
     #  Wait for next request from client
     while(1):
@@ -73,39 +69,34 @@ def client():
         msg = str(message)
         
         if(msg == "1"):
- 
             #pick machine random and choose first port alive
             res = ""
             j=0
- 
             while (res=="" and j in range(len(Nports[k]))):
                 if Nports[k][j][1] == 'Y':
                     res = Nports[k][j][0]
                 j+=1
             #set busy
             #Nports[k][j-1][2]= 'B'
-            
             socket.send_string(res)
             time.sleep(1)
             print ("Reply is sent... ")
         
-        
+#############################################################
 def successNode():        
      #recived success from node 
      print(socketNode1.recv_string())
      time.sleep(1)
-#     socket.send_string("Uploaded Successfully")
-   
+     
+#############################################################
 def successClient():
-#    while 1:
     #send success to client
     socketClient.send_string("Uploaded Successfully")
 
 
-###################################################
-#connecting to clients
+#############################################################
 if __name__ == "__main__": 
-    
+    #connecting to clients
     port = "5556"
     if len(sys.argv) > 1:
         port =  sys.argv[1]
@@ -133,12 +124,11 @@ if __name__ == "__main__":
     socketNode1.bind ("tcp://*:%s" % portz)
     
     ##############################################################
-    
     #to send success to clients
     portx = "1088"
 
-    socketClient = context.socket(zmq.REP)
-    socketClient.bind ("tcp://*:%s" % portx)
+    socketClient = context.socket(zmq.REQ)
+    socketClient.connect ("tcp://localhost:%s" % portx)
     
     ##############################################################
     # creating thread 
@@ -146,13 +136,14 @@ if __name__ == "__main__":
     t2 = threading.Thread(target=client) 
     t3 = threading.Thread(target=successNode)
     t4 = threading.Thread(target=successClient)
-    #while True:
-        # starting thread 1 
+   
+    # starting threads 
     t2.start() 
-    # starting thread 2 
+    
     t1.start() 
     
     t3.start()
-    
+    #when receiving success from node done
     t3.join()
+    #send success to client 
     t4.start()
