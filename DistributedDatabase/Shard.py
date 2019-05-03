@@ -7,6 +7,7 @@ Created on Thu Apr 18 15:22:33 2019
 import zmq
 import sys
 import pymysql as PyMySQL
+
 # Open database connection
 db = PyMySQL.connect("localhost","testuser","123456","Usersdb" )
 
@@ -19,8 +20,9 @@ cursor = db.cursor()
 
 
 port=int(sys.argv[1])
-firstPortSecondShard = int (sys.argv[2])
-firstPortThirdShard = int (sys.argv[3])
+portPub = int(sys.argv[2])
+firstPortSecondShard = int (sys.argv[3])
+firstPortThirdShard = int (sys.argv[4])
 mysub=[]
 for i in range (3):
     mysub.append(firstPortSecondShard+i)
@@ -34,8 +36,8 @@ socket.bind("tcp://*:%s" % port)
 ### publisher connection with my subsribers
 contextPub = zmq.Context()
 socketPub = contextPub.socket(zmq.PUB)
-for i in range(len(mysub)):
-    socketPub.bind("tcp://*:%s" % mysub[i])
+#for i in range(len(mysub)):
+socketPub.bind("tcp://*:%s" % portPub)
 
 ### subsriber connection with my subscribers(in this case they are the publishers)
 contextSub = zmq.Context()
@@ -45,8 +47,6 @@ for i in range (len(mysub)):
     topicfilter = "Insert"
     socketSub.setsockopt_string(zmq.SUBSCRIBE, topicfilter)
 
-
-insertion = False
 while True:
     message = socket.recv()
     print ("Received request: ", message)    
