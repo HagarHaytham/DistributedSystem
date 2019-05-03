@@ -9,7 +9,7 @@ Created on Thu Apr 18 14:29:14 2019
 import getpass  # for password to be invisible
 import zmq
 #import sys
-import time
+#import time
 
 
 ##### ----------- initial db Configuration --------------------#####
@@ -48,16 +48,27 @@ def UserAuthenticate():
             mode = input("To Sign Up type 1 and to log in choose 2\n")
         
         ##### ADD CHECKS ON INPUT!!!!
-        username = input('Enter Username(Username MUST begin with letter):')
-        while not(username[0].isalpha()):
+        print ("Any input cannot contain spaces")
+        space=[]
+        while True:
             username = input('Enter Username(Username MUST begin with letter):')
-        Password = getpass.getpass('Enter Password:') 
-        
+            space=username.split()
+            if (username[0].isalpha()) and len(space)==1:
+                break
+        while True:
+            Password = getpass.getpass('Enter Password:')
+            space=Password.split()
+            if len(space)==1:
+                break
+            
         ####### Construct the message
         msg=mode+" " +username+" "+ Password+" "
         if (mode =="1"):  # sign up
-            ## new user so check if user name exists
-             Email = input('Enter Email:')
+             while True:
+                 Email = input('Enter Email:')
+                 space=Email.split()
+                 if len(space)==1:
+                     break
              msg +=Email
              
         #else: # log in
@@ -111,6 +122,6 @@ def UserAuthenticate():
                 return True
      
 isAuthenticated =UserAuthenticate()   
-     
+print(isAuthenticated)
 ##### if authenticated let it talk to the master tracker
         
