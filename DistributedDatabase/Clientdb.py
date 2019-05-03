@@ -8,12 +8,10 @@ Created on Thu Apr 18 14:29:14 2019
 ## Client Process ## Cordinator ####
 import getpass  # for password to be invisible
 import zmq
-#import sys
-#import time
-
 
 ##### ----------- initial db Configuration --------------------#####
-
+IPS = ['localhost','localhost','localhost'] # 3 shards IPs
+# for testing on one machine , can begin from the same port in diffrent machines
 portsbegin=[5000,5005,5010] # shard 1 begins from port 5000 , shard 2 begins from 5005 and shard 3 from 5010
 port=[]
 context =[]
@@ -30,14 +28,15 @@ for i in range (3): # 3 shards
     print ("Connecting to server(s) of machine %s...",i)
     socket.append(context[i].socket(zmq.REQ))
     for j in range (3): # 3 processes for each shard
-        socket[i].connect ("tcp://localhost:%s" % port[i][j])
+        socket[i].connect ("tcp://%s:%s" %(IPS[i], port[i][j]))
         socket[i].RCVTIMEO =500
-#        socket[i].settimeout(500) # wait for socket 500 ms to respond it will through an exception
+        socket[i].setsockopt(zmq.LINGER, 3000)  # set zmq.LINGER to 3 seconds to let the client process terminate if there is no servers up
         
 ####Letters for each machine(shard)
 Listm1 =['j','s','b','w','f','g','q','u']
 Listm2 =['m','c','l','e','t','p','i','n']
 Listm3 =['r','d','a','k','h','o','v','x','y','z']
+
 def UserAuthenticate():
     
     Error = True
@@ -70,9 +69,6 @@ def UserAuthenticate():
                  if len(space)==1:
                      break
              msg +=Email
-             
-        #else: # log in
-             
             
         ####### (pick server to assign this task for)
         shardbusy=[0,0,0]
@@ -88,7 +84,6 @@ def UserAuthenticate():
         while connectingDb==True:
             
             print ("Sending request ")
-    #        socket[shard].send_string(msg)  ## bocking or not ?
             message = b'this server is busy .. please wait connecting to another server'
             try:  
                 ###### get response from that server
@@ -121,7 +116,7 @@ def UserAuthenticate():
                 Error = False
                 return True
      
-isAuthenticated =UserAuthenticate()   
+isAuthenticated =UserAuthenticate()  
 print(isAuthenticated)
 ##### if authenticated let it talk to the master tracker
         
