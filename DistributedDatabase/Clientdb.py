@@ -8,8 +8,12 @@ Created on Thu Apr 18 14:29:14 2019
 ## Client Process ## Cordinator ####
 import getpass  # for password to be invisible
 import zmq
-import sys
-#import tim
+#import sys
+import time
+
+
+##### ----------- initial db Configuration --------------------#####
+
 portsbegin=[5000,5005,5010] # shard 1 begins from port 5000 , shard 2 begins from 5005 and shard 3 from 5010
 port=[]
 context =[]
@@ -27,58 +31,86 @@ for i in range (3): # 3 shards
     socket.append(context[i].socket(zmq.REQ))
     for j in range (3): # 3 processes for each shard
         socket[i].connect ("tcp://localhost:%s" % port[i][j])
+        socket[i].RCVTIMEO =500
+#        socket[i].settimeout(500) # wait for socket 500 ms to respond it will through an exception
         
 ####Letters for each machine(shard)
 Listm1 =['j','s','b','w','f','g','q','u']
 Listm2 =['m','c','l','e','t','p','i','n']
 Listm3 =['r','d','a','k','h','o','v','x','y','z']
-Error = True
-while Error == True:
-    ####### take the command from user
-    mode = input("To Sign Up type 1 and to log in choose 2\n")
-    while(mode != "1" and mode != "2"):
+def UserAuthenticate():
+    
+    Error = True
+    while Error == True:
+        ####### take the command from user
         mode = input("To Sign Up type 1 and to log in choose 2\n")
-    
-    ##### ADD CHECKS ON INPUT!!!!
-    username = input('Enter Username(Username MUST begin with letter):')
-    while not(username[0].isalpha()):
+        while(mode != "1" and mode != "2"):
+            mode = input("To Sign Up type 1 and to log in choose 2\n")
+        
+        ##### ADD CHECKS ON INPUT!!!!
         username = input('Enter Username(Username MUST begin with letter):')
-    Password = getpass.getpass('Enter Password:') 
-    
-    ####### Construct the message
-    msg=mode+" " +username+" "+ Password+" "
-    if (mode =="1"):  # sign up
-        ## new user so check if user name exists
-         Email = input('Enter Email:')
-         msg +=Email
-         
-    #else: # log in
-         
+        while not(username[0].isalpha()):
+            username = input('Enter Username(Username MUST begin with letter):')
+        Password = getpass.getpass('Enter Password:') 
         
-    ####### (pick server to assign this task for)
-         
-    if username[0] in Listm1 :
-        shard=0
-    elif username[0] in Listm2 :
-        shard=1
-    else:
-        shard=2
-    
-    
-    #while True:
+        ####### Construct the message
+        msg=mode+" " +username+" "+ Password+" "
+        if (mode =="1"):  # sign up
+            ## new user so check if user name exists
+             Email = input('Enter Email:')
+             msg +=Email
+             
+        #else: # log in
+             
+            
+        ####### (pick server to assign this task for)
+        shardbusy=[0,0,0]
+        if username[0] in Listm1 :
+            shard=0
+        elif username[0] in Listm2 :
+            shard=1
+        else:
+            shard=2
+        shardbusy[shard] =1
         
-    print ("Sending request ")
-    socket[shard].send_string(msg)
-    message = socket[shard].recv()
-        
-    print ("Received reply of request ,recieved ", message)
-    ###### get response from that server
-
-    RecievedMsg = str(message,'utf-8')
-    if (RecievedMsg == "Signed in Sucessfully" or RecievedMsg=="Logged in Sucessfully"):
-        Error = False
+        connectingDb=True
+        while connectingDb==True:
+            
+            print ("Sending request ")
+    #        socket[shard].send_string(msg)  ## bocking or not ?
+            message = b'this server is busy .. please wait connecting to another server'
+            try:  
+                ###### get response from that server
+                socket[shard].send_string(msg)  ## bocking or not ?
+                message = socket[shard].recv()#(flags=zmq.NOBLOCK)
+            except:
+                pass
+                
+            print ("Received reply of request: ", message)
+            
+            RecievedMsg = str(message,'utf-8')
+            if RecievedMsg =="this server is busy .. please wait connecting to another server":
+                ## connect to another shard if any
+                i=0
+                found = False
+                while (i<3 and found==False):
+                    if (shardbusy[i]==0):
+                        shardbusy[i]=1
+                        shard=i
+                        found=True
+                        break
+                    i+=1
+                if found == False:
+                    print("Sorry, all servers are busy.. try again later")
+                    return False
+            else:
+                connectingDb=False
+                
+            if (RecievedMsg == "Signed in Sucessfully" or RecievedMsg=="Logged in Sucessfully"):
+                Error = False
+                return True
      
-     
+isAuthenticated =UserAuthenticate()   
      
 ##### if authenticated let it talk to the master tracker
         

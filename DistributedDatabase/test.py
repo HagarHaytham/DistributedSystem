@@ -43,4 +43,8 @@ for worker in range (20):
 q.join() # wait for the thread to terminate
 print ('Entire job took : ' ,time.time()-start)
     
+import zmq
+
+print("Current libzmq version is %s" % zmq.zmq_version())
+print("Current  pyzmq version is %s" % zmq.__version__)
     
