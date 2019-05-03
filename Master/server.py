@@ -59,7 +59,14 @@ def Nodes():
 #############################################################
 def client():
     #  Wait for next request from client
+    
+     #send choice to node
+    choicePort = "1066"
+    choiceNode = context.socket(zmq.REP)
+    choiceNode.bind("tcp://*:%s" % choicePort)
+    ##################################
     while(1):
+        
         message = ""
         message = socket.recv_string()
         print ("Received request: ", message)
@@ -67,7 +74,7 @@ def client():
         print ("Finding available ports... ")
         
         msg = str(message)
-        
+       
         if(msg == "1"):
             #pick machine random and choose first port alive
             res = ""
@@ -82,16 +89,31 @@ def client():
             time.sleep(1)
             print ("Reply is sent... ")
         
+        ##########################
+        #send choice to node
+        print(choiceNode.recv_string())
+        choiceNode.send_string(msg)
+        #########################
+        #recived and send success  
+        success()
+        
 #############################################################
-def successNode():        
+def success():
+           
      #recived success from node 
-     print(socketNode1.recv_string())
+     portz = "1077"
+     context = zmq.Context()
+     socketNode1 = context.socket(zmq.REP)
+     socketNode1.bind ("tcp://*:%s" % portz)
+     succ= socketNode1.recv_string()
+     print(succ)
      time.sleep(1)
-     
-#############################################################
-def successClient():
-    #send success to client
-    socketClient.send_string("Uploaded Successfully")
+     ##################################
+     #send success to client
+     portx = "1088"
+     socketClient = context.socket(zmq.REQ)
+     socketClient.connect ("tcp://localhost:%s" % portx)    
+     socketClient.send_string("Uploaded Successfully")
 
 
 #############################################################
@@ -114,36 +136,13 @@ if __name__ == "__main__":
         
     print("conecting to nodes...")
     socketNode.connect ("tcp://localhost:%s" % port1)
-    
-    
-    ##############################################################
-    #to recieve success from nodes
-    portz = "1077"
 
-    socketNode1 = context.socket(zmq.REP)
-    socketNode1.bind ("tcp://*:%s" % portz)
-    
-    ##############################################################
-    #to send success to clients
-    portx = "1088"
-
-    socketClient = context.socket(zmq.REQ)
-    socketClient.connect ("tcp://localhost:%s" % portx)
-    
-    ##############################################################
     # creating thread 
     t1 = threading.Thread(target=Nodes) 
     t2 = threading.Thread(target=client) 
-    t3 = threading.Thread(target=successNode)
-    t4 = threading.Thread(target=successClient)
    
     # starting threads 
     t2.start() 
     
     t1.start() 
     
-    t3.start()
-    #when receiving success from node done
-    t3.join()
-    #send success to client 
-    t4.start()
