@@ -13,6 +13,7 @@ import sys
 def ServerPub(dbLock,db,cursor,socketServer,socketPub):
     # this function is responsible for executing client command
     # and if sign up (new insetion) publish to other shards immediatly
+    print('ServerPub thread began')
     while True:
         message = socketServer.recv()
         print ("Received request: ", message)    
@@ -58,10 +59,11 @@ def ServerPub(dbLock,db,cursor,socketServer,socketPub):
         socketServer.send_string(messageToSend)
 
 
-def Sub(dbLock,db,cursor,socketSub):
+def Sub(dbLock,db,cursor,socketSub,serverPort):
+    print('Subscriber thread began')
     while True:
         messagedata = socketSub.recv()
-        print('Subscriber on .. inserting in db query',messagedata)
+        print('Subscriber on .. inserting in db query at port of server', serverPort)
         try:
             dbLock.acquire()
             # Execute the SQL command
@@ -76,6 +78,7 @@ def Sub(dbLock,db,cursor,socketSub):
 
 def Shard(dbLock,serverPort,PubPort,IP1,IP2,NProcesses,firstPortSecondShard,firstPortThirdShard):
 # Open database connection
+    print('A shard process has began')
     db = PyMySQL.connect("localhost","testuser","123456","Usersdb" )
     
     # prepare a cursor object using cursor() method
@@ -111,7 +114,7 @@ def Shard(dbLock,serverPort,PubPort,IP1,IP2,NProcesses,firstPortSecondShard,firs
         socketSub.setsockopt_string(zmq.SUBSCRIBE, topicfilter)
 
     server_pub = threading.Thread(target=ServerPub, args=(dbLock,db,cursor,socketServer,socketPub))
-    sub = threading.Thread(target=Sub, args=(dbLock,db,cursor,socketSub))
+    sub = threading.Thread(target=Sub, args=(dbLock,db,cursor,socketSub,serverPort))
     
     server_pub.start()
     sub.start()
@@ -122,8 +125,9 @@ def Shard(dbLock,serverPort,PubPort,IP1,IP2,NProcesses,firstPortSecondShard,firs
 portServer=int(sys.argv[1])
 portPub = int(sys.argv[2])
 ### ports should be the same , instead i should takes IPs of the other 2 machines
-firstPortSecondShard = int (sys.argv[3])
-firstPortThirdShard = int (sys.argv[4])
+SecondShard = int (sys.argv[3])
+ThirdShard = int (sys.argv[4])
+#IP1='10.5.50.33'
 IP1='localhost'
 IP2='localhost'
 
@@ -133,10 +137,10 @@ if __name__ == '__main__':
     for i in range (3):
         ser=portServer+i
         pub=portPub+i
-        sec = firstPortSecondShard+i
-        thir = firstPortThirdShard+i
-        p.append(Process(target=Shard,args=(dbLock,ser,pub,IP1,IP2,3,sec,thir)))
+#        sec = firstPortSecondShard+i
+#        thir = firstPortThirdShard+i
+        p.append(Process(target=Shard,args=(dbLock,ser,pub,IP1,IP2,3,SecondShard,ThirdShard)))
         p[i].start()
-        p[i].join()
+
         
         
