@@ -9,6 +9,7 @@ from multiprocessing import Process, Lock
 import sys
 import time
 def f(l, i):
+    print('I am at the beginig of ',i)
     l.acquire()
     try:
         print('hello world', i)
