@@ -52,7 +52,7 @@ def UserAuthenticate():
         while True:
             username = input('Enter Username(Username MUST begin with letter):')
             space=username.split()
-            if (username[0].isalpha()) and len(space)==1:
+            if  len(space)==1 and (username[0].isalpha()):
                 break
         while True:
             Password = getpass.getpass('Enter Password:')
