@@ -22,17 +22,17 @@ if len(sys.argv) > 2:
 
 
 def success():
-    while 1:
-        #connect to server to recieve success uploading
-        socketServer = context.socket(zmq.REP)
-        portx = "1088"
-        socketServer.bind ("tcp://*:%s" % portx)
-        #recieving success from server
-        print(socketServer.recv_string())
+    #while 1:
+    #connect to server to recieve success uploading
+    socketServer = context.socket(zmq.REP)
+    portx = "1088"
+    socketServer.bind ("tcp://*:%s" % portx)
+    #recieving success from server
+    print(socketServer.recv_string())
     
 t1 = threading.Thread(target=success) 
 
-t1.start()
+#t1.start()
     
 while 1:
    
@@ -71,7 +71,7 @@ while 1:
         print (socket1.recv_string())
         #sending file name
         socket1.send_string(file)
-        
+        success()
         
         
     elif(read == "2"):

@@ -38,14 +38,6 @@ LookUpTable[2]=node2
 
 #array nodes and processes
 Nports = [[["1100",'Y','A'],["2000",'N','A'],["3000",'N','A']],[["4000",'N','A'],["5000",'Y'],["600",'Y','A']],[["700",'Y','A'],["800",'Y','A'],["900",'Y','A']]]
-
-##def pickNode():
-#n= []
-#for i in range(len(LookUpTable)):
-#    if LookUpTable[i][1] == 'Y':
-#        n.append(i)
-#
-#k=random.choice(n)
     
 #print(LookUpTable)
 
@@ -147,7 +139,10 @@ def success():
      socketNode1.bind ("tcp://*:%s" % portz)
      succ= socketNode1.recv_string()
      print(succ)
+     #print(socketNode1.recv_string())
      ##################################
+     #load()
+     
      #send success to client
      portx = "1088"
      #context = zmq.Context()

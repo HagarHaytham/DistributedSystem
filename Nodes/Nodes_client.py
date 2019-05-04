@@ -69,6 +69,7 @@ def upload():
     
     msg="Uploaded Successfully"
     serverSocket1.send_string(msg)
+    #serverSocket1.send_string(file)
     #time.sleep(1)
     print(msg)
 
