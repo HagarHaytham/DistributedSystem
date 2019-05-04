@@ -32,16 +32,20 @@ LookUpTable[1]=node1
 LookUpTable[2]=node2
 
 
+#{0: [{100: ['name.mp4'], 200: ['name.mp4'], 300: ['name.mp4']}, 'Y'],
+# 1: [{100: ['name.mp4'], 200: ['name.mp4'], 300: ['name.mp4']}, 'Y'], 
+# 2: [{100: ['name.mp4'], 200: ['name.mp4'], 300: ['name.mp4']}, 'Y']}
+
 #array nodes and processes
 Nports = [[["1100",'Y','A'],["2000",'N','A'],["3000",'N','A']],[["4000",'N','A'],["5000",'Y'],["600",'Y','A']],[["700",'Y','A'],["800",'Y','A'],["900",'Y','A']]]
 
-#def pickNode():
-n= []
-for i in range(len(LookUpTable)):
-    if LookUpTable[i][1] == 'Y':
-        n.append(i)
-
-k=random.choice(n)
+##def pickNode():
+#n= []
+#for i in range(len(LookUpTable)):
+#    if LookUpTable[i][1] == 'Y':
+#        n.append(i)
+#
+#k=random.choice(n)
     
 #print(LookUpTable)
 
@@ -71,12 +75,19 @@ def client():
         message = socket.recv_string()
         print ("Received request: ", message)
         time.sleep(1)
-        print ("Finding available ports... ")
-        
         msg = str(message)
        
         if(msg == "1"):
-            #pick machine random and choose first port alive
+            #pick machine random and choose random port alive
+            #random pickNode
+            print ("Finding available ports... ")
+            n= []
+            for i in range(len(LookUpTable)):
+                if LookUpTable[i][1] == 'Y':
+                    n.append(i)
+            
+            k=random.choice(n)
+            
             res = ""
             j=0
             while (res=="" and j in range(len(Nports[k]))):
@@ -85,36 +96,66 @@ def client():
                 j+=1
             #set busy
             #Nports[k][j-1][2]= 'B'
+            
+            #send port to client
             socket.send_string(res)
-            time.sleep(1)
+            #time.sleep(1)
             print ("Reply is sent... ")
+            
+            ##########################
+            #send choice to node
+            print(choiceNode.recv_string())
+            choiceNode.send_string(msg)
+            #########################
+            #recived and send success  
+            success()
         
-        ##########################
-        #send choice to node
-        print(choiceNode.recv_string())
-        choiceNode.send_string(msg)
-        #########################
-        #recived and send success  
-        success()
+        elif(msg == "2"):
+            
+            ##########################
+            #send choice to node
+            print(choiceNode.recv_string())
+            choiceNode.send_string(msg)
+            #########################
+            #################################################
+            #get files for user
+            UserId = 100
+            arr = ""
+            for i in range(len(LookUpTable)):
+                if(LookUpTable[i][0][UserId]):
+                    userFiles = LookUpTable[i][0][UserId] 
+                    for j in range(len(userFiles)):
+                        arr += userFiles[j]
+                        arr += '\n'
+               
+            print(arr)
+            socket.send_string(arr)
+        
+            #send success to client
+            #portx = "1088"
+            #context = zmq.Context()
+            #socketClient = context.socket(zmq.REQ)
+            #socketClient.connect ("tcp://localhost:%s" % portx)    
+            #socketClient.send_string("show done Successfully")
         
 #############################################################
 def success():
-           
+    
      #recived success from node 
      portz = "1077"
-     context = zmq.Context()
      socketNode1 = context.socket(zmq.REP)
      socketNode1.bind ("tcp://*:%s" % portz)
      succ= socketNode1.recv_string()
      print(succ)
-     time.sleep(1)
      ##################################
      #send success to client
      portx = "1088"
+     #context = zmq.Context()
      socketClient = context.socket(zmq.REQ)
      socketClient.connect ("tcp://localhost:%s" % portx)    
+     #send success to client
      socketClient.send_string("Uploaded Successfully")
-
+     
 
 #############################################################
 if __name__ == "__main__": 
@@ -133,7 +174,6 @@ if __name__ == "__main__":
     #connecting to Nodes
     port1 = "5555"
     socketNode = context.socket(zmq.SUB)
-        
     print("conecting to nodes...")
     socketNode.connect ("tcp://localhost:%s" % port1)
 
@@ -143,6 +183,5 @@ if __name__ == "__main__":
    
     # starting threads 
     t2.start() 
-    
     t1.start() 
     

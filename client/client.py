@@ -1,7 +1,7 @@
 import zmq
 import sys
 import time
-
+import threading
 
 port = "5556"
 if len(sys.argv) > 1:
@@ -21,12 +21,22 @@ if len(sys.argv) > 2:
     socket.connect ("tcp://localhost:%s" % port1)
 
 
+def success():
+    while 1:
+        #connect to server to recieve success uploading
+        socketServer = context.socket(zmq.REP)
+        portx = "1088"
+        socketServer.bind ("tcp://*:%s" % portx)
+        #recieving success from server
+        print(socketServer.recv_string())
+    
+t1 = threading.Thread(target=success) 
+
+t1.start()
+    
 while 1:
    
-    #connect to server to recieve success uploading
-    socketServer = context.socket(zmq.REP)
-    portx = "1088"
-    socketServer.bind ("tcp://*:%s" % portx)
+   
     ##################################################################
 
     #  Do request, waiting for a response
@@ -36,10 +46,6 @@ while 1:
     #send the choice to server    
     socket.send_string(read)
     print ("Sending request...")
-    
-    #  Get the port from server
-    message = socket.recv_string()
-    print ("Received port ", message)
       
     ##################################################################
     #connect to node/process with given port to upload file
@@ -47,7 +53,9 @@ while 1:
     socket1.connect ("tcp://localhost:%s" % "2000")
   
     if(read == '1'):
-
+     #  Get the port from server
+        message = socket.recv_string()
+        print ("Received port ", message)
         #uploading happens
         print ("connecting to process...Enter your file") 
         #reading video
@@ -63,8 +71,15 @@ while 1:
         print (socket1.recv_string())
         #sending file name
         socket1.send_string(file)
-
+        
+        
+        
+    elif(read == "2"):
+        
+        #show happening
+        print ("connecting to process...")
+        print(socket.recv_string())
         #recieving success from server
-        print(socketServer.recv_string())
-    
+        #print(socket.recv_string())
+        
     #socket1.close()

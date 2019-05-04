@@ -16,6 +16,7 @@ file = ""
 def connectClient():
     
     while 1:
+        #connect server
         portChoice = "1066"
         serverChoice = context.socket(zmq.REQ)
         serverChoice.connect ("tcp://localhost:%s" % portChoice)
@@ -25,6 +26,10 @@ def connectClient():
         
         if(choice == '1'):
             upload()
+        elif(choice == '2'):
+            print("show")
+        elif(choice == '3'):
+            print("download")
     
 ##########################################################
 
@@ -49,7 +54,7 @@ def upload():
     #####################################
     print ("connecting to client...")
     l = clientSocket.recv()
-    time.sleep(1)
+    #time.sleep(1)
     f = open('file.mp4','wb')
     f.write(l)
     f.close()
