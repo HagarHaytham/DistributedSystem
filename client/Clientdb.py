@@ -115,11 +115,11 @@ def UserAuthenticate(IPS,portsbegin):
                 Error = False
                 return True,username
 
-IPS = ['localhost','localhost','localhost'] # 3 shards IPs
-# for testing on one machine , can begin from the same port in diffrent machines
-portsbegin=[5000,5005,5010] # shard 1 begins from port 5000 , shard 2 begins from 5005 and shard 3 from 5010     
-isAuthenticated ,username=UserAuthenticate(IPS,portsbegin)  
-print(isAuthenticated)
-print(username)
+# IPS = ['localhost','localhost','localhost'] # 3 shards IPs
+# # for testing on one machine , can begin from the same port in diffrent machines
+# portsbegin=[5000,5005,5010] # shard 1 begins from port 5000 , shard 2 begins from 5005 and shard 3 from 5010     
+# isAuthenticated ,username=UserAuthenticate(IPS,portsbegin)  
+# print(isAuthenticated)
+# print(username)
 ##### if authenticated let it talk to the master tracker
         
