@@ -2,84 +2,114 @@ import zmq
 import sys
 import time
 import threading
-
-port = "5556"
-if len(sys.argv) > 1:
-    port =  sys.argv[1]
-    int(port)
-
-if len(sys.argv) > 2:
-    port1 =  sys.argv[2]
-    int(port1)
-
-#connect to server
-context = zmq.Context()
-print ("Connecting to server...")
-socket = context.socket(zmq.REQ)
-socket.connect ("tcp://localhost:%s" % port)
-if len(sys.argv) > 2:
-    socket.connect ("tcp://localhost:%s" % port1)
+import Clientdb as c
 
 
-def success():
-    #while 1:
-    #connect to server to recieve success uploading
-    socketServer = context.socket(zmq.REP)
-    portx = "1088"
-    socketServer.bind ("tcp://*:%s" % portx)
-    #recieving success from server
-    print(socketServer.recv_string())
+#connect to default port of server from db, connect to this port w send username
+def initConnServer(context, serverPort):
     
-t1 = threading.Thread(target=success) 
-
-#t1.start()
+    socketID = context.socket(zmq.REQ)
+    socketID.connect ("tcp://localhost:%s" % serverPort)
     
-while 1:
-   
-   
-    ##################################################################
+    return socketID
 
-    #  Do request, waiting for a response
-    print ("Waiting request... Choose 1-Upload 2-Show 3-Download")
-    read = input()
+
+#send choice of client to default port of server from db
+def sendChoice(socketID,choice):
+    socketID.send_string(choice)
+    return socketID.recv_string()
+
+
+def initUplNodePort(dataNodePort):
+    #send,recv from datanode port from server
+    dataNodeSocket = context.socket(zmq.REQ)
+    dataNodeSocket.connect ("tcp://localhost:%s" % dataNodePort)
+    return dataNodeSocket
+
+
+def initDwnldNodePort(msg):
+    return
+
+
+def closeDwnld(dataNodeSockets):
+    return
+
+
+def success(successSocket):
     
-    #send the choice to server    
-    socket.send_string(read)
-    print ("Sending request...")
-      
-    ##################################################################
-    #connect to node/process with given port to upload file
-    socket1 = context.socket(zmq.REQ)
-    socket1.connect ("tcp://localhost:%s" % "2000")
-  
-    if(read == '1'):
-     #  Get the port from server
-        message = socket.recv_string()
-        print ("Received port ", message)
-        #uploading happens
-        print ("connecting to process...Enter your file") 
-        #reading video
-        file=input()
-        f = open(file,'rb')
-        print ('Sending...')
-        l = f.read()
-        #sending video
-        socket1.send(l)
-        f.close()
-        print ("Done Sending")
-        #recieve complete
-        print (socket1.recv_string())
-        #sending file name
-        socket1.send_string(file)
-        success()
+    print(successSocket.recv_string())
+    return
+
+
+def main():
+
+    context = zmq.Context()
+
+    #connect to db get user ID
+    IPS = ['localhost','localhost','localhost'] # 3 shards IPs
+    # for testing on one machine , can begin from the same port in diffrent machines
+    portsbegin = [5000,5005,5010] # shard 1 begins from port 5000 , shard 2 begins from 5005 and shard 3 from 5010     
+    isAuthenticated, serverPort = c.UserAuthenticate(IPS, portsbegin)
+    
+    print(isAuthenticated, serverPort)
+    #if connected to db true
+    
+    if isAuthenticated:
+        ##################################################################
+        #initialize connection with server and send userName
+        print("enter auth")
+        socketID = initConnServer(context, serverPort)
         
-        
-    elif(read == "2"):
-        
-        #show happening
-        print ("connecting to process...")
-        print(socket.recv_string())
-        #recieving success from server
-        #print(socket.recv_string())
-        
-    #socket1.close()
+        while 1:
+            ##################################################################
+            #  Do request, waiting for a response
+            print ("Waiting request... Choose 1-Upload 2-Show 3-Download")
+            read = input()
+            reply = sendChoice(socketID,read)
+            print(reply)
+            ##################################################################
+           
+            if(read == '1'):
+             #  Get the port from server
+                dataNodeSocket = initUplNodePort(reply)
+
+                #uploading happens
+                print ("connecting to process...Enter your file") 
+
+                #reading video
+                file = input()
+                f = open(file,'rb')
+                print('Sending...')
+
+                #sending file name
+                dataNodeSocket.send_string(file)
+
+                #dummy receive
+                print (dataNodeSocket.recv_string())
+                
+                l = f.read()
+                f.close()
+                #sending video
+                dataNodeSocket.send(l)
+                dataNodeSocket.close()
+                
+                print ("Done Sending,waiting for success")
+                success(socketID)
+                
+                
+            elif(read == "2"):
+                
+                files = socketID.recv_string()
+                print(files)
+
+            elif(read == "3"):
+
+                #download happening
+                msg = reqSocket.recv_string()
+                reqSocket.close()
+                dataNodeSockets = initDwnldNodePort(msg)
+                closeDwnld(dataNodeSockets)
+                print ("connecting to process...")
+    return 
+    
+main()

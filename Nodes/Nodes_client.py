@@ -17,7 +17,7 @@ def connectClient():
     
     while 1:
         #connect server
-        portChoice = "1066"
+        portChoice = sys.argv[1]
         serverChoice = context.socket(zmq.REQ)
         serverChoice.connect ("tcp://localhost:%s" % portChoice)
         #recv choice of client from server
@@ -48,7 +48,7 @@ def alive():
 
 def upload():
     #connect to client
-    port = "2000"
+    port = sys.argv[2]
     clientSocket = context.socket(zmq.REP)
     clientSocket.bind("tcp://*:%s" % port)
     #####################################
@@ -80,11 +80,11 @@ if __name__ == "__main__":
     t2 = threading.Thread(target=alive)
     
     #connecting to server
-    port1 = "5555"
+#    port1 = "5555"
     context = zmq.Context()
-    serverSocket = context.socket(zmq.PUB)
-    serverSocket.bind("tcp://*:%s" % port1)
-    print ("connecting to Server...")
+#    serverSocket = context.socket(zmq.PUB)
+#    serverSocket.bind("tcp://*:%s" % port1)
+#    print ("connecting to Server...")
 
     t1.start()
-    t2.start()
+    #t2.start()
