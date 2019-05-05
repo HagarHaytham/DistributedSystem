@@ -18,6 +18,7 @@ def SendMasterNewPort(socketClient,PortClientAssigned,portClientLock,username):
     
     msgToSend = str(portassigned)+" "+username ## send to master the client username and the port to talk to
     socketClient.send_string(msgToSend) 
+    print("msg done ",msgToSend)
     socketClient.recv()
     return portassigned
  
