@@ -8,6 +8,7 @@ import zmq
 import socket
 import sys
 import time
+
 def replicate():
     port = "1100"
     if len(sys.argv) > 1:

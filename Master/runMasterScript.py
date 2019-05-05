@@ -1,0 +1,44 @@
+from multiprocessing import Process, Manager
+
+from server import main as serverMain
+
+if __name__ == '__main__':
+
+	manager = Manager()
+	lookupTable = manager.dict()
+	Nports = manager.list()
+
+	lookupTable[0] = [{'':[]}, '']
+	seed = 2001
+
+	for i in range(3):
+		temp = []
+		for j in range(3):
+			#[0] = alive port between node and server
+			#[1] = upload port between node and client
+			#[2] = success port between node and server
+			#[3] = download port between node and client
+			#[4] = replicate port between node and server
+			#[5] = replicate port between node and node
+			temp.append([str(seed), str(seed + 1), str(seed + 2), str(seed + 3), str(seed + 4), str(seed + 5), 'A', 'A'])
+			#shift by 10 for 2nd process
+			seed = seed + 10
+
+		Nports.append(temp)
+
+
+	print(Nports)
+	#Nports = [[[''], [], []], [[], [], []], [[], [], []]]
+	master1 = Process(target = serverMain, args = (lookupTable, Nports, "3000"))
+	master1.start()
+	
+	master2 = Process(target = serverMain, args = (lookupTable, Nports, "3001"))
+	master2.start()
+	
+	master3 = Process(target = serverMain, args = (lookupTable, Nports, "3002"))
+	master3.start()
+
+
+	master1.join()
+	master2.join()
+	master3.join()
