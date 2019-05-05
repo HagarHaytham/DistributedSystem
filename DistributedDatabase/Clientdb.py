@@ -8,6 +8,7 @@ Created on Thu Apr 18 14:29:14 2019
 ## Client Process ## Cordinator ####
 import getpass  # for password to be invisible
 import zmq
+import re
 
 
 
@@ -110,10 +111,12 @@ def UserAuthenticate(IPS,portsbegin):
                     return False,username
             else:
                 connectingDb=False
-                
-            if (RecievedMsg == "Signed in Sucessfully" or RecievedMsg=="Logged in Sucessfully"):
+            x = re.search("Signed in Sucessfully",RecievedMsg) 
+            y = re.search("Logged in Sucessfully",RecievedMsg)
+            if (x !=None or y != None):
+                msgPort= RecievedMsg.split()
                 Error = False
-                return True,username
+                return True,int(msgPort[3])
 
 IPS = ['localhost','localhost','localhost'] # 3 shards IPs
 # for testing on one machine , can begin from the same port in diffrent machines

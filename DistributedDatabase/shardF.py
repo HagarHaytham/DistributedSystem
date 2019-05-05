@@ -7,7 +7,7 @@ Created on Sat May  4 01:21:31 2019
 import zmq
 import pymysql as PyMySQL
 import threading
-from multiprocessing import Process, Lock
+from multiprocessing import Process, Lock, Value
 import sys
 
 def ServerPub(dbLock,db,cursor,socketServer,socketPub):
@@ -131,6 +131,8 @@ IP1=sys.argv[1]
 IP2=sys.argv[2]
 #IP1='localhost'
 #IP2='localhost'
+IPMaster=sys.argv[3]
+portMaster=int (sys.argv[4])
 n=3
 if __name__ == '__main__':
     dbLock = Lock()
