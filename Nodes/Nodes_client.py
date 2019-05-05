@@ -13,8 +13,7 @@ from multiprocessing import Process
 
 file = ""
 
-
-def connectClients(context,uplPort,dnlwdPort):
+def connectClients(context):
     
     #connect client
     # uplPort = sys.argv[2]
@@ -29,24 +28,13 @@ def connectClients(context,uplPort,dnlwdPort):
     return uplSocket,dnlwdSocket
     
 
-def initConn(context,port1,ip1):
-     #connect server
-    # serverPort = sys.argv[1]
+def initConn(context):
+    #connect server
+    serverPort = sys.argv[1]
     serverSocket = context.socket(zmq.REQ)
     serverSocket.connect ("tcp://%s:%s" % (ip1,port1)
     
     return serverSocket
-    
-        #recv choice of client from server
-        #serverChoice.send_string("Node ready for request...")
-#        choice = serverChoice.recv_string()
-#        
-#        if(choice == '1'):
-#            upload()
-#        elif(choice == '2'):
-#            print("show")
-#        elif(choice == '3'):
-#            print("download")
     
 ##########################################################
 
@@ -84,12 +72,6 @@ def upload(uplS,succ):
         f.close()
         print ("Done Receiving")
         
-        #    
-        #####################################
-        #    portz= "1077"
-        #    serverSocket1 = context.socket(zmq.REQ)
-        #    serverSocket1.connect("tcp://localhost:%s" % portz)
-        
         msg="Success " + file
         succ.send_string(msg)
         #serverSocket1.send_string(file)
@@ -100,6 +82,68 @@ def upload(uplS,succ):
 
 def dwn(uplS):
     return
+
+def replicate(context, port):
+    
+    while True:
+        rSocket = context.socket(zmq.REP)
+        rSocket.bind("tcp://*:%s" % port)
+
+        rOrS=rSocket.recv_string()
+        dst1 = ""
+        dst2 = ""
+        file = ""
+        rSocket.send_string("node: your request recieved")
+        if(rOrS == "s"):
+            dst1 = rSocket.recv_string()
+            #time.sleep(5)
+            rSocket.send_string("node: dst1 recieved")
+
+            dst2 = rSocket.recv_string()
+            rSocket.send_string("node: dst2 recieved")
+
+            file = rSocket.recv_string()
+            rSocket.send_string("node: file recieved")
+            
+            print(rSocket.recv_string())
+            
+            time.sleep(5)
+            openedFile = open(file,'rb')
+            readFile = openedFile.read()
+            if(dst1 != ""):
+                dstSocket1 = context.socket(zmq.REQ)
+                dstSocket1.connect("tcp://localhost:%s" % dst1)
+        
+                print("sending first copy..." )
+                dstSocket1.send(readFile)
+                dstSocket1.close()
+                
+            if(dst2 != ""):
+                dstSocket2 = context.socket(zmq.REQ)
+                dstSocket2.connect("tcp://localhost:%s" % dst2) 
+                
+                print("sending second copy..." )
+                dstSocket2.send(readFile)
+                dstSocket2.close()
+                
+            openedFile.close()
+            rSocket.send_string("node: Done replicating")
+            
+        elif(rOrS == "r"):
+            print("replicating...")
+            file = rSocket.recv_string()
+            rSocket.send_string("rep node: file name recieved")
+
+            recFile = rSocket.recv()
+            
+            openedFile = open(file,'wb')
+            openedFile.write(recFile)
+            openedFile.close()
+
+        rSocket.close()
+
+    return
+
 ########################################################## 
 def main(port1,port2,port3,ip1):
 
@@ -107,11 +151,13 @@ def main(port1,port2,port3,ip1):
     context = zmq.Context()
     success = initConn(context,port1,ip1)    
     
-    uplS,dwnldS = connectClients(context,port2,port3)
+    uplS,dwnldS = connectClients(context)
+    repPort = sys.argv[4]
     
     t1 = threading.Thread(target=upload,args=(uplS,success)) 
     t2 = threading.Thread(target=alive, args = (success))
     t3 = threading.Thread(target=dwn,args=(dwnldS))
+    replicationThread = threading.Thread(target = replicate, args = (context, repPort))
     #connecting to server
 #    port1 = "5555"
     
