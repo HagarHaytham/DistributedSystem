@@ -8,20 +8,20 @@ Created on Thu Apr 18 14:29:14 2019
 ## Client Process ## Cordinator ####
 import getpass  # for password to be invisible
 import zmq
+import re
 import sys
 
 
-
-def UserAuthenticate(IPS,portsbegin,n):
+def UserAuthenticate(IPS):
         ##### ----------- initial db Configuration --------------------#####
-    
+    portsbegin=[5000,5000,5000]
     port=[]
     context =[]
     socket=[] 
         
     for i in range (3): # 3 shards
         port.append([])
-        for j in range (n): # 3 processes for each shard
+        for j in range (3): # 3 processes for each shard
             port[i].append( portsbegin[i]+j)
 
 
@@ -29,9 +29,8 @@ def UserAuthenticate(IPS,portsbegin,n):
         context.append(zmq.Context())
         print ("Connecting to server(s) of machine %s...",i)
         socket.append(context[i].socket(zmq.REQ))
-        for j in range (n): # 3 processes for each shard
+        for j in range (3): # 3 processes for each shard
             socket[i].connect ("tcp://%s:%s" %(IPS[i], port[i][j]))
-            print(IPS[i], port[i][j])
             socket[i].RCVTIMEO =500
             socket[i].setsockopt(zmq.LINGER, 500)  # set zmq.LINGER to 0.5 seconds to let the client process terminate if there is no servers up
             
@@ -89,7 +88,6 @@ def UserAuthenticate(IPS,portsbegin,n):
             try:  
                 ###### get response from that server
                 socket[shard].send_string(msg)  ## bocking or not ?
-                print(shard)
                 message = socket[shard].recv()#(flags=zmq.NOBLOCK)
             except:
                 pass
@@ -113,20 +111,21 @@ def UserAuthenticate(IPS,portsbegin,n):
                     return False,username
             else:
                 connectingDb=False
-                
-            if (RecievedMsg == "Signed in Sucessfully" or RecievedMsg=="Logged in Sucessfully"):
+            x = re.search("Signed in Sucessfully",RecievedMsg) 
+            y = re.search("Logged in Sucessfully",RecievedMsg)
+            if (x !=None or y != None):
+                msgPort= RecievedMsg.split()
                 Error = False
-                return True,username
-n=3
-n=int(sys.argv[1])
-IPS=[]
-for i in range (2,n+2):
-    IPS.append(sys.argv[i])
-#IPS = ['localhost','localhost','localhost'] # 3 shards IPs
-# for testing on one machine , can begin from the same port in diffrent machines
-portsbegin=[5000,5000,5000] # shard 1 begins from port 5000 , shard 2 begins from 5005 and shard 3 from 5010     
-isAuthenticated ,username=UserAuthenticate(IPS,portsbegin,n)  
-print(isAuthenticated)
-print(username)
+                return True,int(msgPort[3])
+
+#n=3
+#IPS=[]
+#for i in range (1,n+1):
+#    IPS.append(sys.argv[i])
+##IPS = ['localhost','localhost','localhost'] # 3 shards IPs
+## for testing on one machine , can begin from the same port in diffrent machines
+#portsbegin=[5000,5000,5000] # shard 1 begins from port 5000 , shard 2 begins from 5005 and shard 3 from 5010     
+#isAuthenticated ,username=UserAuthenticate(IPS,portsbegin,n)  
+
 ##### if authenticated let it talk to the master tracker
         

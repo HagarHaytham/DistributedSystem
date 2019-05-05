@@ -52,7 +52,7 @@ def ServerPub(dbLock,db,cursor,socketServer,socketPub,socketClient,PortClientAss
                     #topic = "Insert"
                     messagedata = "INSERT INTO USERS (UserName,UserPassword,Email) VALUES ( '"+query[1]+"' , '"+query[2]+"' , '" +query[3] + "' )"
                     socketPub.send_string("%s" % (messagedata))
-                    messageToSend = "Signed in Sucessfully"
+                    messageToSend = "Signed in Sucessfully "
                 except:
                    messageToSend = "Couldn't connect .. try again later"
                    
@@ -65,16 +65,16 @@ def ServerPub(dbLock,db,cursor,socketServer,socketPub,socketClient,PortClientAss
                 if len(result) ==0:
                     messageToSend = "Username or password is incorrect, Please try again"
                 else:
-                    messageToSend="Logged in Sucessfully"
+                    messageToSend="Logged in Sucessfully "
             except:
                 messageToSend = "Couldn't connect .. try again later"
         dbLock.release()
         print("Lock released server")
         
         
-        if messageToSend =="Logged in Sucessfully" or messageToSend== "Signed in Sucessfully":
+        if messageToSend =="Logged in Sucessfully " or messageToSend== "Signed in Sucessfully ":
             # add port assigned to client to the message sent to client
-            messageToSend += str(SendMasterNewPort(socketClient,PortClientAssigned,portClientLock,query[0])) ## username
+            messageToSend += str(SendMasterNewPort(socketClient,PortClientAssigned,portClientLock,query[1])) ## username
             
         socketServer.send_string(messageToSend)
         print("Message sent")
@@ -171,8 +171,6 @@ if __name__ == '__main__':
     for i in range (3):
         ser=portServer+i
         pub=portPub+i
-#        sec = firstPortSecondShard+i
-#        thir = firstPortThirdShard+i
         p.append(Process(target=Shard,args=(dbLock,ser,pub,IPShard2,IPShard3,3,SecondShard,ThirdShard,IPMaster,portMaster,PortClientAssigned,portClientLock)))
         p[i].start()
 
