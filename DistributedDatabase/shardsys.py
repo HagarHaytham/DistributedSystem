@@ -12,13 +12,13 @@ import sys
 
 def SendMasterNewPort(socketClient,PortClientAssigned,portClientLock,username):
     portClientLock.acquire()
-    PortClientAssigned +=1
-    portassigned =PortClientAssigned
+    PortClientAssigned.value +=1
+    portassigned =PortClientAssigned.value
     portClientLock.release()
     
-    msgToSend = portassigned+" "+username ## send to master the client username and the port to talk to
-    socketClient.send_message(msgToSend)
-    socketClient.recv(flags=zmq.NOBLOCK)
+    msgToSend = str(portassigned)+" "+username ## send to master the client username and the port to talk to
+    socketClient.send_string(msgToSend) 
+    socketClient.recv()
     return portassigned
  
 
@@ -74,7 +74,7 @@ def ServerPub(dbLock,db,cursor,socketServer,socketPub,socketClient,PortClientAss
         
         if messageToSend =="Logged in Sucessfully" or messageToSend== "Signed in Sucessfully":
             # add port assigned to client to the message sent to client
-            messageToSend += SendMasterNewPort(socketClient,PortClientAssigned,portClientLock,query[0]) ## username
+            messageToSend += str(SendMasterNewPort(socketClient,PortClientAssigned,portClientLock,query[0])) ## username
             
         socketServer.send_string(messageToSend)
         print("Message sent")
@@ -166,7 +166,7 @@ portMaster=int (sys.argv[5])
 if __name__ == '__main__':
     dbLock = Lock()
     p=[]
-    PortClientAssigned = Value('h',portMaster+1) # if master connection is 3000 , begin to assign ports to client from 3001
+    PortClientAssigned = Value('h',portMaster) # if master connection is 3000 , begin to assign ports to client from 3001
     portClientLock = Lock()
     for i in range (3):
         ser=portServer+i
