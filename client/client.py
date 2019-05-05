@@ -2,14 +2,15 @@ import zmq
 import sys
 import time
 import threading
-import Clientdb as c
+import ClientF as c
+from multiprocessing import process
 
 
 #connect to default port of server from db, connect to this port w send username
-def initConnServer(context, serverPort):
+def initConnServer(context, serverPort,ipServer):
     
     socketID = context.socket(zmq.REQ)
-    socketID.connect ("tcp://localhost:%s" % serverPort)
+    socketID.connect ("tcp://%s:%s" % (ipServer,serverPort))
     
     return socketID
 
@@ -20,10 +21,11 @@ def sendChoice(socketID,choice):
     return socketID.recv_string()
 
 
-def initUplNodePort(context,dataNodePort):
+def initUplNodePort(context,dataNodePort,dataIps):
     #send,recv from datanode port from server
     dataNodeSocket = context.socket(zmq.REQ)
-    dataNodeSocket.connect ("tcp://localhost:%s" % dataNodePort)
+    for i in range (len(dataIps)):
+        dataNodeSocket.connect ("tcp://%s:%s" % (dataIps[i],dataNodePort))
     return dataNodeSocket
 
 
@@ -41,15 +43,15 @@ def success(successSocket):
     return
 
 
-def main():
+def main(IPS,ipServer,dataIps):
 
     context = zmq.Context()
 
     #connect to db get user ID
-    IPS = ['localhost','localhost','localhost'] # 3 shards IPs
+    # IPS = ['localhost','localhost','localhost'] # 3 shards IPs
     # for testing on one machine , can begin from the same port in diffrent machines
-    portsbegin = [5000,5005,5010] # shard 1 begins from port 5000 , shard 2 begins from 5005 and shard 3 from 5010     
-    isAuthenticated, serverPort = c.UserAuthenticate(IPS, portsbegin)
+    # portsbegin = [5000,5005,5010] # shard 1 begins from port 5000 , shard 2 begins from 5005 and shard 3 from 5010     
+    isAuthenticated, serverPort = c.UserAuthenticate(IPS)
     
     print(isAuthenticated, serverPort)
     #if connected to db true
@@ -58,7 +60,7 @@ def main():
         ##################################################################
         #initialize connection with server and send userName
         print("enter auth")
-        socketID = initConnServer(context, serverPort)
+        socketID = initConnServer(context, serverPort,ipServer)
         
         while 1:
             ##################################################################
@@ -71,7 +73,7 @@ def main():
            
             if(read == '1'):
              #  Get the port from server
-                dataNodeSocket = initUplNodePort(context,reply)
+                dataNodeSocket = initUplNodePort(context,reply,dataIps)
 
                 #uploading happens
                 print ("connecting to process...Enter your file") 
@@ -111,5 +113,13 @@ def main():
                 closeDwnld(dataNodeSockets)
                 print ("connecting to process...")
     return 
-    
-main()
+
+if __name__=='__main__':
+    IPS=[]
+    for i in range(3):
+        IPS.append(sys.argv[i+1])
+    IPserver = sys.argv[4]
+    IPSdata =[]
+    for i in range (5,8):
+        IPSdata.append(sys.argv[i])
+    main(IPS,IPserver,IPSdata)
