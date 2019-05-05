@@ -9,6 +9,7 @@ import time
 import sys
 import random
 import threading
+from multiprocessing import Process
 
 # file =[]
 # file.append("name.mp4")
@@ -39,11 +40,7 @@ import threading
 
 #print(LookUpTable)
 
-dataNodes = []
-for i in range(9):
-    dataNodes.append([sys.argv[i+2], str(int(sys.argv[i+2])+50), str(int(sys.argv[i+2])+100), 'A', 'A'])
 
-print(dataNodes)
 
 
 def initConnDB(context):
@@ -64,7 +61,7 @@ def initClient(context,newPort):
 
 
 #connect to default port of server from db, connect to this port w send username
-def handleClient(context,newPort, username):
+def handleClient(context,newPort, username,dataNodes):
     print("enter handle")
     socketClient = initClient(context,newPort)
     
@@ -73,7 +70,7 @@ def handleClient(context,newPort, username):
         choice = socketClient.recv_string()
 
         if(choice == '1'):
-            upld(context,socketClient, username)
+            upld(dataNodes,context,socketClient, username)
         
         elif(choice == '2'):
             show(context,socketClient, username)
@@ -84,7 +81,7 @@ def handleClient(context,newPort, username):
         return
 
 
-def upld(context,socketClient, username):
+def upld(dataNodes,context,socketClient, username):
     #pick machine random and choose random port alive
     #random pickNode
     print ("Finding available ports... ")
@@ -95,6 +92,7 @@ def upld(context,socketClient, username):
             if dataNodes[i][4] == 'A':
                 loc = i
                 dataNodes[i][4] = 'B'
+                print(dataNodes[loc][1])
                 break
 
     
@@ -102,9 +100,9 @@ def upld(context,socketClient, username):
     socketClient.send_string(dataNodes[loc][1])
     #time.sleep(1)
     print ("Reply is sent... ")
-    success(context,dataNodes[loc][0], socketClient,username)
+    success(dataNodes,context,dataNodes[loc][0], loc, socketClient,username)
 
-def success(context, dataNodePort,socketClient, username):
+def success(dataNodes,context, dataNodePort, loc, socketClient, username):
     
     dataNodeSocket = context.socket(zmq.REP)
     dataNodeSocket.bind ("tcp://*:%s" % dataNodePort)
@@ -113,6 +111,7 @@ def success(context, dataNodePort,socketClient, username):
     print(succ)
     dummy = socketClient.recv_string()
     socketClient.send_string("success")
+    dataNodes[loc][4] = 'A'
     #if(succ == 'Success'):
         #TODO call lookup table to add file
         #updateLookup(dataNodePort, filename, username)
@@ -156,14 +155,18 @@ def dwnld(socketClient, username):
 #        print (topic, IP)
 
 #############################################################
-def main(): 
+def main(shardPort,p1,p2,p3,p4,p5,p6,p7,p8,p9,p10): 
 
     context = zmq.Context()
     socketDB = initConnDB(context)
 
 #    NodeThread = threading.Thread(target=Nodes,args=(context)) 
 #    NodeThread.start()
+    dataNodes = []
+    for i in range(9):
+        dataNodes.append([sys.argv[i+2], str(int(sys.argv[i+2])+50), str(int(sys.argv[i+2])+100), 'A', 'A'])
 
+    print(dataNodes)
     clientThreads = []
 
     #mainThread = threading.Thread(target = getClient(socketDB))
@@ -174,12 +177,16 @@ def main():
         print(newPort, clientUsername)
         socketDB.send_string("recived port Successfully")
 
-        clientThreads.append(threading.Thread(target = handleClient,args=(context,newPort, clientUsername)))
+        clientThreads.append(threading.Thread(target = handleClient,args=(context,newPort, clientUsername,dataNodes)))
         clientThreads[-1].start()
 
     return
 
-main()
+if __name__=='__main__':
+    p=[]
+    shardPort=3000
+    for i in range(3):
+        p.append(Process(target=main,args=(shardPort+i, 2001, 2002, 2003, 2004 ,2005, 2006 ,2007 ,2008 ,2009 ,2010 )))
      # creating thread 
     # defThread = threading.Thread(target=recvUserName,args=(defSocket,choiceSocket,uplSocket,showSocket,dwnldSocket))
     # defThread.start()

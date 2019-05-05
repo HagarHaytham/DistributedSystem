@@ -9,12 +9,12 @@ Created on Thu Apr 18 14:29:14 2019
 import getpass  # for password to be invisible
 import zmq
 import re
+import sys
 
 
-
-def UserAuthenticate(IPS,portsbegin):
+def UserAuthenticate(IPS):
         ##### ----------- initial db Configuration --------------------#####
-    
+    portsbegin=[5000,5000,5000]
     port=[]
     context =[]
     socket=[] 
@@ -116,14 +116,16 @@ def UserAuthenticate(IPS,portsbegin):
             if (x !=None or y != None):
                 msgPort= RecievedMsg.split()
                 Error = False
-                print(msgPort)
                 return True,int(msgPort[3])
 
-#IPS = ['localhost','localhost','localhost'] # 3 shards IPs
+#n=3
+#IPS=[]
+#for i in range (1,n+1):
+#    IPS.append(sys.argv[i])
+##IPS = ['localhost','localhost','localhost'] # 3 shards IPs
 ## for testing on one machine , can begin from the same port in diffrent machines
-#portsbegin=[5000,5005,5010] # shard 1 begins from port 5000 , shard 2 begins from 5005 and shard 3 from 5010     
-#isAuthenticated ,port=UserAuthenticate(IPS,portsbegin)  
-#print(isAuthenticated)
-#print(port)
-###### if authenticated let it talk to the master tracker
-#        
+#portsbegin=[5000,5000,5000] # shard 1 begins from port 5000 , shard 2 begins from 5005 and shard 3 from 5010     
+#isAuthenticated ,username=UserAuthenticate(IPS,portsbegin,n)  
+
+##### if authenticated let it talk to the master tracker
+        
