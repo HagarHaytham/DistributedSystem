@@ -37,21 +37,20 @@ def replicate():
         time.sleep(5)
         openedFile = open(file,'rb')
         readFile = openedFile.read()
-        
-        dstSocket1 = context.socket(zmq.REQ)
-        dstSocket1.connect("tcp://localhost:%s" % dst1)
-        
-
-        
-        print("sending first copy..." )
-        dstSocket1.send(readFile)
-        
-        dstSocket2 = context.socket(zmq.REQ)
-        dstSocket2.connect("tcp://localhost:%s" % dst2) 
-        
-        print("sending second copy..." )
-        dstSocket2.send(readFile)
-        
+        if(dst1 != ""):
+            dstSocket1 = context.socket(zmq.REQ)
+            dstSocket1.connect("tcp://localhost:%s" % dst1)
+    
+            print("sending first copy..." )
+            dstSocket1.send(readFile)
+            
+        if(dst2 != ""):
+            dstSocket2 = context.socket(zmq.REQ)
+            dstSocket2.connect("tcp://localhost:%s" % dst2) 
+            
+            print("sending second copy..." )
+            dstSocket2.send(readFile)
+            
         openedFile.close()
         rSocket.send_string("node: Done replicating")
         
