@@ -20,7 +20,7 @@ def sendChoice(socketID,choice):
     return socketID.recv_string()
 
 
-def initUplNodePort(dataNodePort):
+def initUplNodePort(context,dataNodePort):
     #send,recv from datanode port from server
     dataNodeSocket = context.socket(zmq.REQ)
     dataNodeSocket.connect ("tcp://localhost:%s" % dataNodePort)
@@ -36,7 +36,7 @@ def closeDwnld(dataNodeSockets):
 
 
 def success(successSocket):
-    
+    successSocket.send_string('s')
     print(successSocket.recv_string())
     return
 
@@ -71,7 +71,7 @@ def main():
            
             if(read == '1'):
              #  Get the port from server
-                dataNodeSocket = initUplNodePort(reply)
+                dataNodeSocket = initUplNodePort(context,reply)
 
                 #uploading happens
                 print ("connecting to process...Enter your file") 

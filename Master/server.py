@@ -88,21 +88,6 @@ def upld(context,socketClient, username):
     #pick machine random and choose random port alive
     #random pickNode
     print ("Finding available ports... ")
-#    n= []
-#    for i in range(len(LookUpTable)):
-#        if LookUpTable[i][1] == 'Y':
-#            n.append(i)
-    
-    #k=random.choice(n)
-    
-    # res = ""
-    # j=0
-    # while (res=="" and j in range(len(Nports[k]))):
-    #     if Nports[k][j][1] == 'Y':
-    #         res = Nports[k][j][0]
-    #     j+=1
-    #set busy
-    #Nports[k][j-1][2]= 'B'
 
     loc = 0
     for i in range(len(dataNodes)):
@@ -117,22 +102,23 @@ def upld(context,socketClient, username):
     socketClient.send_string(dataNodes[loc][1])
     #time.sleep(1)
     print ("Reply is sent... ")
-    success(context,dataNodes[loc][0], username)
+    success(context,dataNodes[loc][0], socketClient,username)
 
-def success(context, dataNodePort, username):
+def success(context, dataNodePort,socketClient, username):
     
     dataNodeSocket = context.socket(zmq.REP)
     dataNodeSocket.bind ("tcp://*:%s" % dataNodePort)
     
     succ, filename = (dataNodeSocket.recv_string()).split()
     print(succ)
-
+    dummy = socketClient.recv_string()
+    socketClient.send_string("success")
     #if(succ == 'Success'):
         #TODO call lookup table to add file
         #updateLookup(dataNodePort, filename, username)
     return
 
-def show(socketClient, username):
+def show(context,socketClient, username):
     return
 
 def dwnld(socketClient, username):
