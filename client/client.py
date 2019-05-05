@@ -93,6 +93,7 @@ def main(IPS,ipServer,dataIps):
                 f.close()
                 #sending video
                 dataNodeSocket.send(l)
+                dataNodeSocket.recv_string()
                 dataNodeSocket.close()
                 
                 print ("Done Sending,waiting for success")

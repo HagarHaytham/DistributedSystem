@@ -95,6 +95,7 @@ def upld(context,socketClient, username):
             if dataNodes[i][4] == 'A':
                 loc = i
                 dataNodes[i][4] = 'B'
+                print(dataNodes[loc][1])
                 break
 
     
@@ -102,9 +103,9 @@ def upld(context,socketClient, username):
     socketClient.send_string(dataNodes[loc][1])
     #time.sleep(1)
     print ("Reply is sent... ")
-    success(context,dataNodes[loc][0], socketClient,username)
+    success(context,dataNodes[loc][0], loc, socketClient,username)
 
-def success(context, dataNodePort,socketClient, username):
+def success(context, dataNodePort, loc, socketClient, username):
     
     dataNodeSocket = context.socket(zmq.REP)
     dataNodeSocket.bind ("tcp://*:%s" % dataNodePort)
@@ -113,6 +114,7 @@ def success(context, dataNodePort,socketClient, username):
     print(succ)
     dummy = socketClient.recv_string()
     socketClient.send_string("success")
+    dataNodes[loc][4] = 'A'
     #if(succ == 'Success'):
         #TODO call lookup table to add file
         #updateLookup(dataNodePort, filename, username)
