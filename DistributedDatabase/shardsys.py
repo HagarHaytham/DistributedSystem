@@ -21,6 +21,7 @@ def ServerPub(dbLock,db,cursor,socketServer,socketPub):
         query = msg.split()
         print(query)
         dbLock.acquire()
+        print("Lock aquired server")
         if (query[0] =='1'): # Sign Up
             sqlcheck = "SELECT * FROM USERS where Username= %s"
             cursor.execute(sqlcheck,(query[1],))
@@ -56,8 +57,9 @@ def ServerPub(dbLock,db,cursor,socketServer,socketPub):
             except:
                 messageToSend = "Couldn't connect .. try again later"
         dbLock.release()
+        print("Lock released server")
         socketServer.send_string(messageToSend)
-
+        print("Message sent")
 
 def Sub(dbLock,db,cursor,socketSub,serverPort):
     print('Subscriber thread began')
@@ -66,13 +68,17 @@ def Sub(dbLock,db,cursor,socketSub,serverPort):
         print('Subscriber on .. inserting in db query at port of server', serverPort)
         try:
             dbLock.acquire()
+            print("Lock aquired subscriber")
             # Execute the SQL command
             cursor.execute(messagedata)
             # Commit your changes in the database
             db.commit()
             dbLock.release()
+            print("Lock released subscriber")
         
         except:
+            dbLock.release()
+            print("Lock released subscriber")
             print("Already inserted (may be) ..")
             
 

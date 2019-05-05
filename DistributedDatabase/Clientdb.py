@@ -31,7 +31,7 @@ def UserAuthenticate(IPS,portsbegin):
         for j in range (3): # 3 processes for each shard
             socket[i].connect ("tcp://%s:%s" %(IPS[i], port[i][j]))
             socket[i].RCVTIMEO =500
-            socket[i].setsockopt(zmq.LINGER, 3000)  # set zmq.LINGER to 3 seconds to let the client process terminate if there is no servers up
+            socket[i].setsockopt(zmq.LINGER, 500)  # set zmq.LINGER to 0.5 seconds to let the client process terminate if there is no servers up
             
     ####Letters for each machine(shard)
     Listm1 =['j','s','b','w','f','g','q','u']

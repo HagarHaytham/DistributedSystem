@@ -20,7 +20,7 @@ def ServerPub(dbLock,db,cursor,socketServer,socketPub):
         msg = str(message,'utf-8')
         query = msg.split()
         print(query)
-#        dbLock.acquire()
+        dbLock.acquire()
         if (query[0] =='1'): # Sign Up
             sqlcheck = "SELECT * FROM USERS where Username= %s"
             cursor.execute(sqlcheck,(query[1],))
@@ -38,7 +38,7 @@ def ServerPub(dbLock,db,cursor,socketServer,socketPub):
                     ### then publish that if it is an insertion
                     #topic = "Insert"
                     messagedata = "INSERT INTO USERS (UserName,UserPassword,Email) VALUES ( '"+query[1]+"' , '"+query[2]+"' , '" +query[3] + "' )"
-                    socketPub.send_string("%s" % (messagedata),flags=zmq.NOBLOCK)
+                    socketPub.send_string("%s" % (messagedata))
                     messageToSend = "Signed in Sucessfully"
                 except:
                    messageToSend = "Couldn't connect .. try again later"
@@ -55,7 +55,7 @@ def ServerPub(dbLock,db,cursor,socketServer,socketPub):
                     messageToSend="Logged in Sucessfully"
             except:
                 messageToSend = "Couldn't connect .. try again later"
-#        dbLock.release()
+        dbLock.release()
         socketServer.send_string(messageToSend)
 
 
@@ -65,14 +65,14 @@ def Sub(dbLock,db,cursor,socketSub,serverPort):
         messagedata = socketSub.recv()
         print('Subscriber on .. inserting in db query at port of server', serverPort)
         try:
-#            dbLock.acquire()
+            dbLock.acquire()
             # Execute the SQL command
             cursor.execute(messagedata)
             # Commit your changes in the database
             db.commit()
-#            dbLock.release()
-        
+            dbLock.release()
         except:
+            dbLock.release()
             print("Already inserted (may be) ..")
             
 
