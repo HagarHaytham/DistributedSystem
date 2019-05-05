@@ -43,9 +43,9 @@ from multiprocessing import Process
 
 
 
-def initConnDB(context):
+def initConnDB(context,shardPort):
     socketDB = context.socket(zmq.REP)
-    socketDB.bind("tcp://*:%s" %sys.argv[1])
+    socketDB.bind("tcp://*:%s" %shardPort)
     return socketDB
 
 
@@ -158,7 +158,7 @@ def dwnld(socketClient, username):
 def main(shardPort,p1,p2,p3,p4,p5,p6,p7,p8,p9,p10): 
 
     context = zmq.Context()
-    socketDB = initConnDB(context)
+    socketDB = initConnDB(context,shardPort)
 
 #    NodeThread = threading.Thread(target=Nodes,args=(context)) 
 #    NodeThread.start()
@@ -187,6 +187,7 @@ if __name__=='__main__':
     shardPort=3000
     for i in range(3):
         p.append(Process(target=main,args=(shardPort+i, 2001, 2002, 2003, 2004 ,2005, 2006 ,2007 ,2008 ,2009 ,2010 )))
+
      # creating thread 
     # defThread = threading.Thread(target=recvUserName,args=(defSocket,choiceSocket,uplSocket,showSocket,dwnldSocket))
     # defThread.start()

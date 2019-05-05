@@ -17,3 +17,6 @@ python clientdb.py
 #11 for alive receive
 
 #python server.py 3000 2001 2002 2003 2004 2005 2006 2007 2008 2009 2010 
+
+# cd Nodes
+# python Nodes_client.py 2001 2051 2101 ipserverSuccess

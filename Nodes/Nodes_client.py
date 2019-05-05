@@ -33,7 +33,7 @@ def initConn(context,port1,ip1):
      #connect server
     # serverPort = sys.argv[1]
     serverSocket = context.socket(zmq.REQ)
-    serverSocket.connect ("tcp://%s:%s" % (ip1,port1)
+    serverSocket.connect ("tcp://%s:%s" % (ip1,port1))
     
     return serverSocket
     
