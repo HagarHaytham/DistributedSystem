@@ -116,6 +116,7 @@ def UserAuthenticate(IPS,portsbegin):
             if (x !=None or y != None):
                 msgPort= RecievedMsg.split()
                 Error = False
+                print(msgPort)
                 return True,int(msgPort[3])
 
 #IPS = ['localhost','localhost','localhost'] # 3 shards IPs

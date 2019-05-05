@@ -8,6 +8,7 @@ Created on Thu Apr 18 14:29:14 2019
 ## Client Process ## Cordinator ####
 import getpass  # for password to be invisible
 import zmq
+import re
 
 
 
@@ -110,16 +111,19 @@ def UserAuthenticate(IPS,portsbegin):
                     return False,username
             else:
                 connectingDb=False
-                
-            if (RecievedMsg == "Signed in Sucessfully" or RecievedMsg=="Logged in Sucessfully"):
+            x = re.search("Signed in Sucessfully",RecievedMsg) 
+            y = re.search("Logged in Sucessfully",RecievedMsg)
+            if (x !=None or y != None):
+                msgPort= RecievedMsg.split()
                 Error = False
-                return True,username
-
-IPS = ['localhost','localhost','localhost'] # 3 shards IPs
-# for testing on one machine , can begin from the same port in diffrent machines
-portsbegin=[5000,5005,5010] # shard 1 begins from port 5000 , shard 2 begins from 5005 and shard 3 from 5010     
-isAuthenticated ,username=UserAuthenticate(IPS,portsbegin)  
-print(isAuthenticated)
-print(username)
+                print("I am returning ")
+                return True,int(msgPort[3])
+#
+#IPS = ['localhost','localhost','localhost'] # 3 shards IPs
+## for testing on one machine , can begin from the same port in diffrent machines
+#portsbegin=[5000,5005,5010] # shard 1 begins from port 5000 , shard 2 begins from 5005 and shard 3 from 5010     
+#isAuthenticated ,port=UserAuthenticate(IPS,portsbegin)  
+#print(isAuthenticated)
+#print(port)
 ##### if authenticated let it talk to the master tracker
         
