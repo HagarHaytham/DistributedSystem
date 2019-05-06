@@ -3,6 +3,8 @@ import sys
 import time
 import threading
 import ClientF as c
+from multiprocessing import process
+
 
 
 #connect to default port of server from db, connect to this port w send username
