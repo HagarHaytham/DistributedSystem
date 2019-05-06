@@ -30,11 +30,40 @@ def initUplNodePort(context,dataNodePort,dataIps):
     return dataNodeSocket
 
 
-def initDwnldNodePort(msg):
+def initDwnldNodePorts(context, dwnldPorts):
+    dwnldPorts = dwnldPorts.split()
+    state = dwnldPorts[0]
+    fileSize = int(dwnldPorts[1])
+    ips = dwnldPorts[2:2+int((len(dwnldPorts)-2)/2)]
+    dataPorts = dwnldPorts[2+int((len(dwnldPorts)-2)/2):]
+
+    if(state == 'Found'):
+        dwnldSocket = context.socket(zmq.REQ)
+        for i in range(len(ips)):
+            dwnldSocket.connect("tcp://" + ips[i] + ":" + dataPorts[i])
+
+        dwnld(context, fileSize, ips, dwnldSocket)
+    return
+
+def dwnld(context, fileSize, ips, dwnldSocket):
+    received = 0
+    shard = 1
+
+    while received < fileSize:
+
+        print("Sending request for shard ", shard, "...")
+        dataSocket.send_string(fileName + " " + str(shard))
+        message = dataSocket.recv_string()
+        print("Received reply ", "[", message, "]")
+        received += 1024
+        shard += 1
+
+    closeDwnld(dwnldSocket)
     return
 
 
-def closeDwnld(dataNodeSockets):
+def closeDwnld(dwnldSocket):
+    dwnldSocket.close()
     return
 
 
@@ -103,8 +132,9 @@ def main(IPS,ipServer,dataIps):
                 
             elif(read == "2"):
                 
-                files = socketID.recv_string()
-                print(files)
+                dwnldPorts = socketID.recv_string()
+                initDwnldNodePorts(context, dwnldPorts)
+                print(dwnldPorts)
 
             # elif(read == "3"):
 
