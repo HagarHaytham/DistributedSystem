@@ -10,65 +10,65 @@ import zmq
 import time
 
 #updated when a file is uploaded
-files = [[2,"name.mp4"],[3,"name2.mp4"],[2,"name6.mp4"],[1,"name3.mp4"],[2,"name3.mp4"],[3,"name4.mp4"],[1,"name5.mp4"],[2,"name6.mp4"]]
-
-file02 =[]
-file02.append("name.mp4")
-file02.append("name6.mp4")
-file02.append("name3.mp4")
-
-file03 =[]
-file03.append("name2.mp4")
-
-file11 =[]
-file11.append("name3.mp4")
-
-file12 =[]
-file12.append("name.mp4")
-
-file13 =[]
-file13.append("name4.mp4")
-file13.append("name2.mp4")
-
-
-file21 =[]
-file21.append("name5.mp4")
-
-file22 =[]
-file22.append("name6.mp4")
-file22.append("name.mp4")
-
-
-
-user0 ={}
-user0[2]=file02
-user0[3]=file03
-
-user1 ={}
-user1[1]=file11
-user1[2]=file12
-user1[3]=file13
-
-user2 ={}
-user2[1]=file21
-user2[2]=file22
-
-alive='Y'
-Nalive='N'
-node0 = [user0,alive]
-node1 = [user1,alive]
-node2 = [user2,alive]
-
-LookUpTable={}
-
-LookUpTable[0]=node0
-LookUpTable[1]=node1
-LookUpTable[2]=node2
-#print(LookUpTable)
-#Nports = [[["1500",'Y','A'],["2000",'N','A'],["3000",'Y','A']],[["4000",'Y','A'],["5000",'Y','A'],["6000",'Y','A']],[["7000",'Y','A'],["9100",'Y','A'],["9000",'Y','A']]]
-rPorts = [["localhost","6000",'A'],["localhost","6100",'A'],["localhost","6200",'A']]
-sPorts = [["localhost","7000",'A'],["localhost","7100",'A'],["localhost","7200",'A']]
-#ports that will recieve copies
+#files = [[2,"name.mp4"],[3,"name2.mp4"],[2,"name6.mp4"],[1,"name3.mp4"],[2,"name3.mp4"],[3,"name4.mp4"],[1,"name5.mp4"],[2,"name6.mp4"]]
+#
+#file02 =[]
+#file02.append("name.mp4")
+#file02.append("name6.mp4")
+#file02.append("name3.mp4")
+#
+#file03 =[]
+#file03.append("name2.mp4")
+#
+#file11 =[]
+#file11.append("name3.mp4")
+#
+#file12 =[]
+#file12.append("name.mp4")
+#
+#file13 =[]
+#file13.append("name4.mp4")
+#file13.append("name2.mp4")
+#
+#
+#file21 =[]
+#file21.append("name5.mp4")
+#
+#file22 =[]
+#file22.append("name6.mp4")
+#file22.append("name.mp4")
+#
+#
+#
+#user0 ={}
+#user0[2]=file02
+#user0[3]=file03
+#
+#user1 ={}
+#user1[1]=file11
+#user1[2]=file12
+#user1[3]=file13
+#
+#user2 ={}
+#user2[1]=file21
+#user2[2]=file22
+#
+#alive='Y'
+#Nalive='N'
+#node0 = [user0,alive]
+#node1 = [user1,alive]
+#node2 = [user2,alive]
+#
+#LookUpTable={}
+#
+#LookUpTable[0]=node0
+#LookUpTable[1]=node1
+#LookUpTable[2]=node2
+##print(LookUpTable)
+##Nports = [[["1500",'Y','A'],["2000",'N','A'],["3000",'Y','A']],[["4000",'Y','A'],["5000",'Y','A'],["6000",'Y','A']],[["7000",'Y','A'],["9100",'Y','A'],["9000",'Y','A']]]
+#rPorts = [["localhost","6000",'A'],["localhost","6100",'A'],["localhost","6200",'A']]
+#sPorts = [["localhost","7000",'A'],["localhost","7100",'A'],["localhost","7200",'A']]
+##ports that will recieve copies
 
 
 #port that will send copies
@@ -224,7 +224,7 @@ def main(LookUpTable,files,rPorts,sPorts):
                 rPorts[dstNode2][2] = 'A'
         print(LookUpTable)
         time.sleep(10)    
-main(LookUpTable,files,rPorts,sPorts)    
+#main(LookUpTable,files,rPorts,sPorts)    
 #
 #print(rPorts)            
             
