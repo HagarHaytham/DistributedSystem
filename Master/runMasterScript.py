@@ -1,7 +1,7 @@
 import sys
 from multiprocessing import Process, Manager
 from server import main as serverMain
-# from replicates import main as repMain
+from replicates import main as repMain
 
 
 if __name__ == '__main__':
@@ -13,8 +13,9 @@ if __name__ == '__main__':
 
 	lookupTable[0] = [{'':[]}, 'A']
 	lookupTable[1] = [{'':[]}, 'A']
-	lookupTable[2] = [{'':[]}, 'A']
-	
+	lookupTable[2] = [{'':[]}, 'A'] 
+    
+    files = []	
 	seed = 2001
 
 	for i in range(3):
@@ -27,11 +28,16 @@ if __name__ == '__main__':
 			#[4] = download port between node and client
 			#[5] = replicate port between node and server
 			#[6] = replicate port between node and node
-			temp.append([sys.argv[i+1], "2001", str(seed + 1), str(seed + 2), str(seed + 3), str(seed + 4), str(seed + 5), 'A', 'A'])
+			temp.append([sys.argv[i+1], "2001", str(seed + 1), str(seed + 2), str(seed + 3), str(defSeed + 4), str(defSeed + 5), 'A', 'A'])
 			#shift by 10 for 2nd process
 			seed = seed + 10
+        defSeed = defSeed + 10
 
 		Nports.append(temp)
+        
+    sPort = [["2005",'A'], ["2015",'A'], ["2025",'A']]
+    
+    nPort = [["2006",'A'], ["2016",'A'], ["2026",'A']]
 
 
 	print(Nports)
@@ -44,8 +50,11 @@ if __name__ == '__main__':
 	
 	master3 = Process(target = serverMain, args = (lookupTable, Nports, files, "3200"))
 	master3.start()
-
-
+    
+    replication= Process(target = repMain, args = (lookupTable, files,nPort, sPort))
+    replication.start()
+    
 	master1.join()
 	master2.join()
 	master3.join()
+    replication.join()
