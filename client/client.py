@@ -52,8 +52,8 @@ def dwnld(context, fileSize, ips, dwnldSocket):
     while received < fileSize:
 
         print("Sending request for shard ", shard, "...")
-        dataSocket.send_string(fileName + " " + str(shard))
-        message = dataSocket.recv_string()
+        dwnldSocket.send_string(str(shard))
+        message = dwnldSocket.recv_string()
         print("Received reply ", "[", message, "]")
         received += 1024
         shard += 1
@@ -103,6 +103,9 @@ def main(IPS,ipServer,dataIps):
            
             if(read == '1'):
              #  Get the port from server
+                socketID.send_string(choice)
+                reply = socketID.recv_string()
+
                 dataNodeSocket = initUplNodePort(context,reply,dataIps)
 
                 #uploading happens
@@ -131,19 +134,20 @@ def main(IPS,ipServer,dataIps):
                 
                 
             elif(read == "2"):
-                
+                print(socketID.recv_string())
+                # dwnldPorts = socketID.recv_string()
+                # initDwnldNodePorts(context, dwnldPorts)
+                # print(dwnldPorts)
+
+            elif(read == "3"):
+
+                #download happening
+                print('enter file name')
+                socketID.send_string(input())
                 dwnldPorts = socketID.recv_string()
                 initDwnldNodePorts(context, dwnldPorts)
-                print(dwnldPorts)
 
-            # elif(read == "3"):
-
-            #     #download happening
-            #     msg = reqSocket.recv_string()
-            #     reqSocket.close()
-            #     dataNodeSockets = initDwnldNodePort(msg)
-            #     closeDwnld(dataNodeSockets)
-            #     print ("connecting to process...")
+                print ("connecting to process...")
     return 
 
 if __name__=='__main__':
