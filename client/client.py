@@ -103,8 +103,8 @@ def main(IPS,ipServer,dataIps):
            
             if(read == '1'):
              #  Get the port from server
-                socketID.send_string(read)
                 reply = socketID.recv_string()
+                socketID.send_string(read)
 
                 dataNodeSocket = initUplNodePort(context,reply,dataIps)
 
@@ -127,7 +127,6 @@ def main(IPS,ipServer,dataIps):
                 #sending video
                 dataNodeSocket.send(l)
                 dataNodeSocket.recv_string()
-                dataNodeSocket.close()
                 
                 print ("Done Sending,waiting for success")
                 success(socketID)

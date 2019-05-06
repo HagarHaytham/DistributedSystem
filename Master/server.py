@@ -60,8 +60,8 @@ def upld(context, LookUpTable, Nports, socketClient, username, files):
                 print(Nports[i%3][loc][2])
                 break
                 
-    socketClient.recv_string()
     socketClient.send_string(Nports[loc%3][loc][2])
+    socketClient.recv_string()
     
     #time.sleep(1)
     print ("Reply is sent... ")
@@ -76,6 +76,8 @@ def success(context, LookUpTable, Nports, loc, socketClient, username, files):
     dataNodeSocket.bind ("tcp://*:%s" % Nports[loc%3][loc][3])
     
     succ, filename = (dataNodeSocket.recv_string()).split()
+    dataNodeSocket.send_string("dummy")
+
     print(succ, filename)
     dummy = socketClient.recv_string()
 
