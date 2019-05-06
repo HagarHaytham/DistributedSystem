@@ -7,13 +7,13 @@ from replicates import main as repMain
 if __name__ == '__main__':
 
 	manager = Manager()
-	lookupTable = manager.dict()
+	# lookupTable = manager.dict()
 	Nports = manager.list()
-	files = manager.list()
+	# files = manager.list()
 
-	lookupTable[0] = [{'':[]}, 'A']
-	lookupTable[1] = [{'':[]}, 'A']
-	lookupTable[2] = [{'':[]}, 'A']
+	# lookupTable[0] = [{'':[]}, 'A']
+	# lookupTable[1] = [{'':[]}, 'A']
+	# lookupTable[2] = [{'':[]}, 'A']
 	
 	seed = 2001
 
@@ -36,16 +36,16 @@ if __name__ == '__main__':
 
 	print(Nports)
 	#Nports = [[[''], [], []], [[], [], []], [[], [], []]]
-	master1 = Process(target = serverMain, args = (lookupTable, Nports, files, "3000"))
-	master1.start()
+	# master1 = Process(target = serverMain, args = (lookupTable, Nports, files, "3000"))
+	# master1.start()
 	
-	master2 = Process(target = serverMain, args = (lookupTable, Nports, files, "3100"))
-	master2.start()
+	# master2 = Process(target = serverMain, args = (lookupTable, Nports, files, "3100"))
+	# master2.start()
 	
-	master3 = Process(target = serverMain, args = (lookupTable, Nports, files, "3200"))
-	master3.start()
+	# master3 = Process(target = serverMain, args = (lookupTable, Nports, files, "3200"))
+	# master3.start()
 
 
-	master1.join()
-	master2.join()
-	master3.join()
+	# master1.join()
+	# master2.join()
+	# master3.join()

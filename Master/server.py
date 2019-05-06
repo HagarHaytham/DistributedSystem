@@ -24,7 +24,7 @@ def initClient(context,newPort):
 
 ###############################################################################
 #connect to default port of server from db, connect to this port w send username
-def handleClient(context, Nports, newPort, username):
+def handleClient(context, Nports,LookUpTable, newPort, username, files):
     print("enter handle")
     socketClient = initClient(context,newPort)
     
@@ -33,8 +33,8 @@ def handleClient(context, Nports, newPort, username):
         choice = socketClient.recv_string()
 
         if(choice == '1'):
-            upld(context, Nports, socketClient, username)
-        
+            upld(context, Nports,LookUpTable, socketClient, username, files)
+ 
         elif(choice == '2'):
             show(context,LookUpTable,socketClient, username)
             
@@ -43,78 +43,76 @@ def handleClient(context, Nports, newPort, username):
         
         return
 
-def upld(context, Nports, socketClient, username):
+def upld(context, Nports,LookUpTable, socketClient, username, files):
     #pick machine random and choose random port alive
     #random pickNode
     print ("Finding available ports... ")
 
     loc = 0
     for i in range(len(Nports)):
-        if Nports[i][6] == 'A':
-            if Nports[i][7] == 'A':
+        if Nports[i][7] == 'A':
+            if Nports[i][8] == 'A':
                 loc = i
-                Nports[i][7] = 'B'
-                print(Nports[loc][1])
+                Nports[i][8] = 'B'
+                print(Nports[loc][2])
                 break
                 
-    socketClient.send_string(Nports[loc][1])
+    socketClient.send_string(Nports[loc][2])
     
     #time.sleep(1)
     print ("Reply is sent... ")
-    success(context,Nports, loc, socketClient,username)
+    success(context,Nports,LookUpTable, loc, socketClient,username, files)
 
 ###############################################################################
 
-def success(context, Nports, loc, socketClient, username):
+def success(context, Nports,LookUpTable, loc, socketClient, username, files):
     
     dataNodeSocket = context.socket(zmq.REP)
-    dataNodeSocket.bind ("tcp://*:%s" % Nports[loc][2])
+    dataNodeSocket.bind ("tcp://*:%s" % Nports[loc][3])
     
     succ, filename = (dataNodeSocket.recv_string()).split()
     print(succ)
     dummy = socketClient.recv_string()
 
     socketClient.send_string("success")
-    Nports[loc][7] = 'A'
+    Nports[loc][8] = 'A'
     
-    #if(succ == 'Success'):
+    if(succ == 'Success'):
         #TODO call lookup table to add file
-        #updateUserLookup(LookUpTable, filename, username,loc)
+        updateUserLookup(LookUpTable, filename, username,loc,files)
     return
 
 ###############################################################################
-def updateUserLookup(LookUpTable, filename, username,loc):
+def updateUserLookup(LookUpTable, filename, username,loc,files):
     
     if(username in LookUpTable[loc][0]): #if user already exists
         temp = LookUpTable[i][0][username]
     else: #if new user
         temp = []
-        
+    
+    files.append(filename) #dumy array for replicate
     temp.append(filename)
     LookUpTable[i][0][username] = temp
     return 
     
 ###############################################################################
-def Nodes(context,Nports,LookUpTable): #sending alive to server
+def Nodes(context,Nports,NportsIp,LookUpTable): #sending alive to server
     #connecting to Nodes
     socketNode = context.socket(zmq.SUB)
     print("conecting to nodes...")
     socketNode.connect ("tcp://localhost:%s" % port1)
+    socketNode.RCVTIMEO = 1000
     while 1:
      #connecting to Nodes
-        socketNode.setsockopt_string(zmq.SUBSCRIBE, "ALIVE")
-        #NEED timeout
-        string = socketNode.recv_string()
-        #
-        #print("recieved ",string )
+        for i in range(len(NportsIp)):
+            socketNode.setsockopt_string(zmq.SUBSCRIBE, NportsIp[i][0] + ':' + NportsIp[i][1])
+            string= "N"
+            string = socketNode.recv_string()
+            Nports[i][7] = string
+            LookUpTable[i][1] = string
+       
         time.sleep(1)
-        topic, IP = string.split()
-        print (topic, IP)
-    
-###############################################################################
-def updateAliveLookup(LookUpTable, live, username,loc):
-    return
-    
+
 ###############################################################################
 def show(context,LookUpTable,socketClient, username):
     arr = ""
@@ -166,16 +164,42 @@ def getDwnldList(fileName):
                 
 
 ###############################################################################
-def main(LookUpTable, Nports, dbPort): 
+def main(LookUpTable, Nports, files, dbPort): 
 
+	# print(LookUpTable, Nports)
+	context = zmq.Context()
+	socketDB = initConnDB(context, dbPort)
+
+	# for i in range(len(Nports)):
+
+	#use example of lookup table
+	temp = temp = Nports[0]
+	if(dbPort == "3000"):
+		temp[0][0] = "blaaaah"
+		
+	elif(dbPort == "3001"):
+		temp[0][1] = 'a'
+		
+	else:
+		temp[0][2] = 'qrrrr'
+		
+	Nports[0] = temp
+
+	print('/n/n')
+	print(Nports[0], Nports[1], Nports[2])
+	print('/n/n')
+    
+	
     clientThreads = []
     context = zmq.Context()
     socketDB = initConnDB(context, dbPort)
     NodeThread = []
+    print('All', '\n\n')
 
-    # for i in range(3):
-    #     NodeThread.append(threading.Thread(target=Nodes,args=(context,Nports[:][:][0:1],LookUpTable))) #alivePort
-    #     NodeThread[i].start()
+     for i in range(3):
+         NodeThread.append(threading.Thread(target=Nodes,args=(context,Nports[:][:][0:1],LookUpTable))) #alivePort
+         NodeThread[i].start()
+
 
     # replicationThread = threading.Thread(target = runReplicate, args = (context, replicationPorts, allFiles, LookUpTable))
 
@@ -189,28 +213,26 @@ def main(LookUpTable, Nports, dbPort):
 
     return
 
-    
 
-	# for i in range(len(Nports)):
+		clientThreads.append(threading.Thread(target = handleClient,args=(context,Nports, LookUpTable, newPort, clientUsername,files)))
+		clientThreads[-1].start()
 
-	#use example of lookup table
-	# temp = temp = Nports[0]
-	# if(dbPort == "3000"):
-	# 	temp[0][0] = "blaaaah"
-		
-	# elif(dbPort == "3001"):
-	# 	temp[0][1] = 'a'
-		
-	# else:
-	# 	temp[0][2] = 'qrrrr'
-		
-	# Nports[0] = temp
+# for i in range(len(Nports)):
 
-	# print('/n/n')
-	# print(Nports[0], Nports[1], Nports[2])
-	# print('/n/n')
+    #use example of lookup table
+    # temp = temp = Nports[0]
+    # if(dbPort == "3000"):
+    #   temp[0][0] = "blaaaah"
+        
+    # elif(dbPort == "3001"):
+    #   temp[0][1] = 'a'
+        
+    # else:
+    #   temp[0][2] = 'qrrrr'
+        
+    # Nports[0] = temp
 
-
-    
-
+    # print('/n/n')
+    # print(Nports[0], Nports[1], Nports[2])
+    # print('/n/n')
 
