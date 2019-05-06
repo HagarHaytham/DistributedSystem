@@ -69,6 +69,7 @@ def upload(uplS,succ):
     
     msg="Success " + file
     succ.send_string(msg)
+    succ.recv_string()
     print(msg)
 
     return
