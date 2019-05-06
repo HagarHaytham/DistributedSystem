@@ -8,15 +8,16 @@ import zmq
 import sys
 #import time
 
-def replicate(port):
+def replicate(sport,nport):
     #port = "1100"
     if len(sys.argv) > 1:
-        port =  sys.argv[1]
-        int(port)
+        sport =  int(sys.argv[1])
+        nport = int(sys.argv[2])
+        #int(port)
     while(1):
         context = zmq.Context()
         rSocket = context.socket(zmq.REP)
-        rSocket.bind("tcp://*:%s" % port)
+        rSocket.bind("tcp://*:%s" % sport)
         rOrS=rSocket.recv_string()
         dIP1 = ""
         dst1 = ""
@@ -61,19 +62,22 @@ def replicate(port):
             rSocket.send_string("node: Done replicating")
             rSocket.close()
         elif(rOrS == "r"):
+            context = zmq.Context()
+            nSocket = context.socket(zmq.REP)
+            nSocket.bind("tcp://*:%s" % nport)
             print("replicating...")
             file = rSocket.recv_string()
             rSocket.send_string("rep node: file name recieved")
     
-            recFile = rSocket.recv()
+            recFile = nSocket.recv()
             print("Done replication")
             openedFile = open(file,'wb')
             openedFile.write(recFile)
             openedFile.close()
-            rSocket.close()
+            nSocket.close()
             
         
-replicate(6000)
+replicate(7000,6000)
 
     
     
