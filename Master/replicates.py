@@ -7,10 +7,9 @@ Created on Fri May  3 16:51:35 2019
 
 
 import zmq
-import socket
-import time
+
 #updated when a file is uploaded
-files = ["name.mp4","name2.mp4","name3.mp4","name4.mp4","name5.mp4","name6.mp4"]
+#files = ["name.mp4","name2.mp4","name3.mp4","name4.mp4","name5.mp4","name6.mp4"]
 
 file02 =[]
 file02.append("name.mp4")
@@ -60,153 +59,166 @@ node2 = [user2,alive]
 
 LookUpTable={}
 
-LookUpTable[0]=node0
-LookUpTable[1]=node1
-LookUpTable[2]=node2
-print(LookUpTable)
-Nports = [[["1500",'Y','A'],["2000",'N','A'],["3000",'Y','A']],[["4000",'Y','A'],["5000",'Y','A'],["6000",'Y','A']],[["7000",'Y','A'],["9100",'Y','A'],["9000",'Y','A']]]
-rPorts = [[["6000",'A'],["6100",'A'],["6200",'A']],[["7000",'A'],["7100",'A'],["7200",'A']],[["8000",'A'],["8100",'A'],["8200",'A']]]
-
+#LookUpTable[0]=node0
+#LookUpTable[1]=node1
+#LookUpTable[2]=node2
+#print(LookUpTable)
+#Nports = [[["1500",'Y','A'],["2000",'N','A'],["3000",'Y','A']],[["4000",'Y','A'],["5000",'Y','A'],["6000",'Y','A']],[["7000",'Y','A'],["9100",'Y','A'],["9000",'Y','A']]]
+#rPorts = [["localhost","6000",'A'],["localhost","6100",'A'],["localhost","6200",'A']]
 #ports that will recieve copies
-dstport1 = ""
-dstport2 = ""
+
 
 #port that will send copies
-srcport = ""
+
 
 # detecting if a file has less than 3 replicates
-for i in range(len(files)):
-    fCount = 0
-    nodes = []
-    fUser = 0
-    for node in LookUpTable:
-        for user in LookUpTable[node][0]:
-            for q in range(len(LookUpTable[node][0][user])):
-                if(LookUpTable[node][0][user][q] == files[i]):
-                    fCount += 1
-                    nodes.append(node)
-                    fUser = user
-    print("nodes that have "+files[i] +": "+str(nodes))
-    
-    # getting nodes to be copied to 
-    
-    if(fCount < 3):
-        # the following variables used to update availablity
-        srcNode = 0
-        srcPort = 0
-        dstNode1 = 0
-        dstPort1 = 0
-        dstNode2 = 0
-        dstPort2 = 0
+
+def main(LookUpTable,files,rPorts):
+    for i in range(len(files)):
+        srcIP = ""
+        srcport = ""
+        dstIP1 = ""
+        dstport1 = ""
+        dstIP2 = ""
+        dstport2 = ""
+        fCount = 0
+        nodes = []
+        nodesToHave = []
+        fUser = 0
         for node in LookUpTable:
-            if (node not in nodes ):
-                j = 0
-                while (dstport1=="" and j in range(len(Nports[node]))):
-                    if(Nports[node][j][1] == 'Y' and rPorts[node][j][1] == 'A' ):
-                        dstport1 = rPorts[node][j][0]
-                        rPorts[node][j][1] == 'B'
-                        #updating in lookup table
-                        if (fUser not in LookUpTable[node][0] ):
-                            LookUpTable[node][0][fUser] = {files[i]}
-                        else:
-                            LookUpTable[node][0][fUser].append(files[i])
-                            
-                        dstNode1 = node
-                        dstPort1 = j
+            for user in LookUpTable[node][0]:
+                for q in range(len(LookUpTable[node][0][user])):
+                    if(LookUpTable[node][0][user][q] == files[i]):
+                        fCount += 1
                         nodes.append(node)
-                        
-                    j += 1
-                
-                
-                j = 0
-            if(fCount < 2):
-                if(node not in nodes):  
-                    while (dstport2=="" and j in range(len(Nports[node]))):
-                        if(Nports[node ][j][1] == 'Y' and rPorts[node ][j][1] == 'A' ):
-                            dstport2 = rPorts[node ][j][0]
-                            rPorts[node ][j][1] == 'B'
+                        nodesToHave.append(node)
+                        fUser = user
+        print("nodes that have "+files[i] +": "+str(nodes))
+        
+        
+        # getting nodes to be copied to 
+        
+        if(fCount < 3):
+            # the following variables used to update availablity
+            srcNode = 0
+            dstNode1 = 0
+            dstNode2 = 0
+            for node in LookUpTable:
+                if (node not in nodesToHave ):
+                    
+                    while (dstport1 == "" ):
+                        if(LookUpTable[node][1] == 'Y' and rPorts[node][2] == 'A' ):
+                            dstIP1 = rPorts[node][0]
+                            dstport1 = rPorts[node][1]
+                            rPorts[node][2] == 'B'
                             #updating in lookup table
                             if (fUser not in LookUpTable[node][0] ):
-                                LookUpTable[node][0][fUser] = {files[i]}
+                                LookUpTable[node][0][fUser] = [files[i]]
                             else:
-                                LookUpTable[node][0][fUser].append(files[i])       
-                            
-                            dstNode2 = node
-                            dstPort2 = j                        
-                            
-                            break
-                        j += 1
-                        
-                
-            
-        # getting the node that will send copy
-        
-        for k in range(len(nodes)):    
-            j=0
-            while (srcport=="" and j in range(len(Nports[nodes[k]]))):
-                if (Nports[nodes[k]][j][1] == 'Y' and rPorts[nodes[k]][j][1] == 'A'):
-                    srcport = rPorts[k][j][0]
-                    rPorts[nodes[k]][j][1] == 'B'
+                                LookUpTable[node][0][fUser].append(files[i])
+                                
+                            dstNode1 = node
+                            nodesToHave.append(node)
                     
-                    srcNode = nodes[k]
-                    srcPort = j
-                    break
-                j+=1
+                            
+                        
+                    
+                    
+                    
+                if(fCount < 2):
+                    if(node not in nodesToHave):  
+                        while (dstport2=="" ):
+                            if(LookUpTable[node ][1] == 'Y' and rPorts[node ][2] == 'A' ):
+                                dstIP1 = rPorts[node][0]
+                                dstport1 = rPorts[node][1]
+                                rPorts[node][2] == 'B'
+                                #updating in lookup table
+                                if (fUser not in LookUpTable[node][0] ):
+                                    LookUpTable[node][0][fUser] = [files[i]]
+                                else:
+                                    LookUpTable[node][0][fUser].append(files[i])       
+                                
+                                dstNode2 = node
+                                                       
+                                
+                                break
+                            
+                            
+                    
                 
+            # getting the node that will send copy
+            
+            for k in range(len(nodes)):    
                 
-        # notifying sender 
-        context = zmq.Context()
-        senderSocket = context.socket(zmq.REQ)
-        senderSocket.connect ("tcp://localhost:%s" % srcport)
-        
-        print("Notifying Sender...")
-        senderSocket.send_string("s")
-        #time.sleep(5)
-        print(senderSocket.recv_string())
-        #senderSocket.connect ("tcp://localhost:%s" % srcPort)
-        senderSocket.send_string(dstport1)
-        print(senderSocket.recv_string())
-
-        
-        senderSocket.send_string(dstport2)
-        print(senderSocket.recv_string())
-
-        senderSocket.send_string(files[i])
-        print(senderSocket.recv_string())
-
-        if(dstport1 != ""):
-            print("Notifying reciever1...")
-            recSocket1 = context.socket(zmq.REQ)
-            recSocket1.connect ("tcp://localhost:%s" % dstport1)
-            recSocket1.send_string("r")
-            print(recSocket1.recv_string())
+                while (srcport == "" ):
+                    if (LookUpTable[nodes[k]][1] == 'Y' and rPorts[nodes[k]][2] == 'A'):
+                        srcIP = rPorts[nodes[k]][0]
+                        srcport = rPorts[nodes[k]][1]
+                        rPorts[nodes[k]][2] == 'B'
+                        
+                        srcNode = nodes[k]
+                       
+                        break
+                    
+                    
+                    
+            # notifying sender 
+            context = zmq.Context()
+            senderSocket = context.socket(zmq.REQ)
+            senderSocket.connect ("tcp://%s:%s" % (srcIP,srcport))
+            
+            print("Notifying Sender...")
+            senderSocket.send_string("s")
+            print(senderSocket.recv_string())
+            
+            senderSocket.send_string(dstIP1)
+            print(senderSocket.recv_string())
+            senderSocket.send_string(dstport1)
+            print(senderSocket.recv_string())
     
-            recSocket1.send_string(files[i])
-        else:
-            print ("can't repicate, there is no alive nodes")
-            continue
-            
-        if(dstport2 != ""):
-            print("Notifying reciever2...")
-            recSocket2 = context.socket(zmq.REQ)
-            recSocket2.connect ("tcp://localhost:%s" % dstport2)
-            recSocket2.send_string("r")   
-            print(recSocket2.recv_string())
+            senderSocket.send_string(dstIP2)
+            print(senderSocket.recv_string())
+            senderSocket.send_string(dstport2)
+            print(senderSocket.recv_string())
     
-            recSocket2.send_string(files[i])
-            
-        senderSocket.send_string("master: Done Notifying... ")
+            senderSocket.send_string(files[i])
+            print(senderSocket.recv_string())
+    
+            if(dstport1 != ""):
+                print("Notifying reciever1...")
+                recSocket1 = context.socket(zmq.REQ)
+                recSocket1.connect ("tcp://%s:%s" % (dstIP1,dstport1))
+                recSocket1.send_string("r")
+                print(recSocket1.recv_string())
         
-        senderSocket.recv_string()
+                recSocket1.send_string(files[i])
+                recSocket1.close()
+            else:
+                print ("can't repicate, there is no alive nodes")
+                continue
+                
+            if(dstport2 != ""):
+                print("Notifying reciever2...")
+                recSocket2 = context.socket(zmq.REQ)
+                recSocket2.connect ("tcp://localhost:%s" % dstport2)
+                recSocket2.send_string("r")   
+                print(recSocket2.recv_string())
         
-        rPorts[srcNode][srcPort][1] = 'A'
-        rPorts[dstNode1][dstPort1][1] = 'A'
-        rPorts[dstNode2][dstPort2][1] = 'A'
-        break
+                recSocket2.send_string(files[i])
+                recSocket2.close()
+                
+            senderSocket.send_string("master: Done Notifying... ")
             
+            print(senderSocket.recv_string())
+            senderSocket.close()
+            rPorts[srcNode][2] = 'A'
+            rPorts[dstNode1][2] = 'A'
+            rPorts[dstNode2][2] = 'A'
+        
             
-print(LookUpTable)
-print(rPorts)            
+#main(LookUpTable,files,rPorts)    
+#print(LookUpTable)
+#print(rPorts)            
             
     
 
