@@ -103,6 +103,9 @@ def main(IPS,ipServer,dataIps):
            
             if(read == '1'):
              #  Get the port from server
+                socketID.send_string(choice)
+                reply = socketID.recv_string()
+
                 dataNodeSocket = initUplNodePort(context,reply,dataIps)
 
                 #uploading happens
