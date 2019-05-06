@@ -2,7 +2,7 @@ import zmq
 import sys
 import time
 import threading
-import Clientdb as c
+import ClientF as c
 
 
 #connect to default port of server from db, connect to this port w send username
@@ -48,8 +48,8 @@ def main():
     #connect to db get user ID
     IPS = ['localhost','localhost','localhost'] # 3 shards IPs
     # for testing on one machine , can begin from the same port in diffrent machines
-    portsbegin = [5000,5005,5010] # shard 1 begins from port 5000 , shard 2 begins from 5005 and shard 3 from 5010     
-    isAuthenticated, serverPort = c.UserAuthenticate(IPS, portsbegin)
+    # portsbegin = [5000,5005,5010] # shard 1 begins from port 5000 , shard 2 begins from 5005 and shard 3 from 5010     
+    isAuthenticated, serverPort = c.UserAuthenticate(IPS)
     
     print(isAuthenticated, serverPort)
     #if connected to db true

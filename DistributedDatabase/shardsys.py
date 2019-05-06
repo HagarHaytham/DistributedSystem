@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """
 Created on Sat May  4 01:21:31 2019
-
 @author: hagar
 """
 import zmq
@@ -18,7 +17,6 @@ def SendMasterNewPort(socketClient,PortClientAssigned,portClientLock,username):
     
     msgToSend = str(portassigned)+" "+username ## send to master the client username and the port to talk to
     socketClient.send_string(msgToSend) 
-    print("msg done ",msgToSend)
     socketClient.recv()
     return portassigned
  
@@ -174,6 +172,3 @@ if __name__ == '__main__':
         pub=portPub+i
         p.append(Process(target=Shard,args=(dbLock,ser,pub,IPShard2,IPShard3,3,SecondShard,ThirdShard,IPMaster,portMaster,PortClientAssigned,portClientLock)))
         p[i].start()
-
-        
-        

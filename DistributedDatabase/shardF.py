@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """
 Created on Sat May  4 01:21:31 2019
-
 @author: hagar
 """
 import zmq
@@ -175,5 +174,4 @@ if __name__ == '__main__':
         p.append(Process(target=Shard,args=(dbLock,ser,pub,IPShard2,IPShard3,3,SecondShard,ThirdShard,IPMaster,portMaster,PortClientAssigned,portClientLock)))
         p[i].start()
 
-        
         
