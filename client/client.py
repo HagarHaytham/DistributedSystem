@@ -135,6 +135,7 @@ def main(IPS,ipServer,dataIps):
                 
             elif(read == "2"):
                 print(socketID.recv_string())
+                socketID.send_string("dummy")
                 # dwnldPorts = socketID.recv_string()
                 # initDwnldNodePorts(context, dwnldPorts)
                 # print(dwnldPorts)

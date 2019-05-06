@@ -34,9 +34,6 @@ def handleClient(context, LookUpTable, Nports, newPort, username, files):
         socketClient.send_string('dummy')
 
         if(choice == '1'):
-            socketClient.recv_string("dummy")
-            reply = socketID.recv_string()
-
             upld(context, LookUpTable, Nports, socketClient, username, files)
  
         elif(choice == '2'):
@@ -57,7 +54,9 @@ def upld(context, LookUpTable, Nports, socketClient, username, files):
         if Nports[i%3][i][7] == 'A':
             if Nports[i%3][i][8] == 'A':
                 loc = i
-                Nports[i%3][i][8] = 'B'
+                state = 'B'
+                Nports[i%3][i][8] = state
+                print(Nports[i%3][i][8])
                 print(Nports[i%3][loc][2])
                 break
                 
@@ -81,7 +80,9 @@ def success(context, LookUpTable, Nports, loc, socketClient, username, files):
     dummy = socketClient.recv_string()
 
     socketClient.send_string("success")
-    Nports[loc%3][loc][8] = 'A'
+    state = 'A'
+    Nports[loc%3][loc][8] = state
+    print("Nports", Nports[i%3][i][8])
     
     if(succ == 'Success'):
         #TODO call lookup table to add file
@@ -138,7 +139,7 @@ def show(context,LookUpTable,socketClient, username):
         arr = "You don't have any files, choose upload to add files"
         
     socketClient.send_string(arr)
-        
+    socketClient.recv_string()
     return
 
 ###############################################################################
