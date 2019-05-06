@@ -34,9 +34,6 @@ def handleClient(context, LookUpTable, Nports, newPort, username, files):
         socketClient.send_string('dummy')
 
         if(choice == '1'):
-            socketClient.recv_string("dummy")
-            reply = socketID.recv_string()
-
             upld(context, LookUpTable, Nports, socketClient, username, files)
  
         elif(choice == '2'):
@@ -138,7 +135,7 @@ def show(context,LookUpTable,socketClient, username):
         arr = "You don't have any files, choose upload to add files"
         
     socketClient.send_string(arr)
-        
+    socketClient.recv_string()
     return
 
 ###############################################################################

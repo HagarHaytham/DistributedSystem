@@ -103,7 +103,7 @@ def main(IPS,ipServer,dataIps):
            
             if(read == '1'):
              #  Get the port from server
-                socketID.send_string(choice)
+                socketID.send_string(read)
                 reply = socketID.recv_string()
 
                 dataNodeSocket = initUplNodePort(context,reply,dataIps)
@@ -135,6 +135,7 @@ def main(IPS,ipServer,dataIps):
                 
             elif(read == "2"):
                 print(socketID.recv_string())
+                socketID.send_string("dummy")
                 # dwnldPorts = socketID.recv_string()
                 # initDwnldNodePorts(context, dwnldPorts)
                 # print(dwnldPorts)
