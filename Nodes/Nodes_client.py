@@ -160,7 +160,7 @@ def main(aliveP, upldP, successP, dwnldP, replServerP):
     replicationThread.start()
 
     t1.start()
-    t2.start()
+    # t2.start()
 
     return
 
