@@ -3,6 +3,7 @@ from multiprocessing import Process, Manager
 from server import main as serverMain
 from replicates import main as repMain
 
+
 if __name__ == '__main__':
 
 	manager = Manager()
