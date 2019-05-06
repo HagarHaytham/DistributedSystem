@@ -10,7 +10,19 @@ import threading
 from multiprocessing import Process, Lock, Value
 import sys
 
-def ServerPub(dbLock,db,cursor,socketServer,socketPub):
+def SendMasterNewPort(socketClient,PortClientAssigned,portClientLock,username):
+    portClientLock.acquire()
+    PortClientAssigned.value +=1
+    portassigned =PortClientAssigned.value
+    portClientLock.release()
+    
+    msgToSend = str(portassigned)+" "+username ## send to master the client username and the port to talk to
+    socketClient.send_string(msgToSend) 
+    socketClient.recv()
+    return portassigned
+ 
+
+def ServerPub(dbLock,db,cursor,socketServer,socketPub,socketClient,PortClientAssigned,portClientLock):
     # this function is responsible for executing client command
     # and if sign up (new insetion) publish to other shards immediatly
     print('ServerPub thread began')
@@ -21,6 +33,7 @@ def ServerPub(dbLock,db,cursor,socketServer,socketPub):
         query = msg.split()
         print(query)
         dbLock.acquire()
+        print("Lock aquired server")
         if (query[0] =='1'): # Sign Up
             sqlcheck = "SELECT * FROM USERS where Username= %s"
             cursor.execute(sqlcheck,(query[1],))
@@ -39,7 +52,7 @@ def ServerPub(dbLock,db,cursor,socketServer,socketPub):
                     #topic = "Insert"
                     messagedata = "INSERT INTO USERS (UserName,UserPassword,Email) VALUES ( '"+query[1]+"' , '"+query[2]+"' , '" +query[3] + "' )"
                     socketPub.send_string("%s" % (messagedata))
-                    messageToSend = "Signed in Sucessfully"
+                    messageToSend = "Signed in Sucessfully "
                 except:
                    messageToSend = "Couldn't connect .. try again later"
                    
@@ -52,12 +65,19 @@ def ServerPub(dbLock,db,cursor,socketServer,socketPub):
                 if len(result) ==0:
                     messageToSend = "Username or password is incorrect, Please try again"
                 else:
-                    messageToSend="Logged in Sucessfully"
+                    messageToSend="Logged in Sucessfully "
             except:
                 messageToSend = "Couldn't connect .. try again later"
         dbLock.release()
+        print("Lock released server")
+        
+        
+        if messageToSend =="Logged in Sucessfully " or messageToSend== "Signed in Sucessfully ":
+            # add port assigned to client to the message sent to client
+            messageToSend += str(SendMasterNewPort(socketClient,PortClientAssigned,portClientLock,query[1])) ## username
+            
         socketServer.send_string(messageToSend)
-
+        print("Message sent")
 
 def Sub(dbLock,db,cursor,socketSub,serverPort):
     print('Subscriber thread began')
@@ -66,17 +86,21 @@ def Sub(dbLock,db,cursor,socketSub,serverPort):
         print('Subscriber on .. inserting in db query at port of server', serverPort)
         try:
             dbLock.acquire()
+            print("Lock aquired subscriber")
             # Execute the SQL command
             cursor.execute(messagedata)
             # Commit your changes in the database
             db.commit()
             dbLock.release()
+            print("Lock released subscriber")
+        
         except:
             dbLock.release()
+            print("Lock released subscriber")
             print("Already inserted (may be) ..")
             
 
-def Shard(dbLock,serverPort,PubPort,IP1,IP2,NProcesses,firstPortSecondShard,firstPortThirdShard):
+def Shard(dbLock,serverPort,PubPort,IP1,IP2,NProcesses,firstPortSecondShard,firstPortThirdShard,IPMaster,portMaster,PortClientAssigned,portClientLock):
 # Open database connection
     print('A shard process has began')
     db = PyMySQL.connect("localhost","testuser","123456","Usersdb" )
@@ -90,18 +114,18 @@ def Shard(dbLock,serverPort,PubPort,IP1,IP2,NProcesses,firstPortSecondShard,firs
         FirstMachineSub.append(firstPortSecondShard+i)
         SecondMachineSub.append(firstPortThirdShard+i)
     
-    ### server connection with client
+    ###my  server connection with client
     contextServer = zmq.Context()
     socketServer = contextServer.socket(zmq.REP)
     socketServer.bind("tcp://*:%s" % serverPort)
     
-    ### publisher connection with my subsribers
+    ###my publisher connection with my subsribers
     contextPub = zmq.Context()
     socketPub = contextPub.socket(zmq.PUB)
     #for i in range(len(mysub)):
     socketPub.bind("tcp://*:%s" % PubPort)
     
-    ### subsriber connection with my subscribers(in this case they are the publishers)
+    ###my subsriber connection with my subscribers(in this case they are the publishers)
     contextSub = zmq.Context()
     socketSub = contextSub.socket(zmq.SUB)
     for i in range (NProcesses): 
@@ -113,7 +137,12 @@ def Shard(dbLock,serverPort,PubPort,IP1,IP2,NProcesses,firstPortSecondShard,firs
         socketSub.connect ("tcp://%s:%s" % (IP2, SecondMachineSub[i]))
         socketSub.setsockopt_string(zmq.SUBSCRIBE, topicfilter)
 
-    server_pub = threading.Thread(target=ServerPub, args=(dbLock,db,cursor,socketServer,socketPub))
+    ## my client connection with the Master to send port assigned to the new client
+    contextClient = zmq.Context()
+    socketClient = contextClient.socket(zmq.REQ)
+    socketClient.connect("tcp://%s:%s" % (IPMaster,portMaster))
+    
+    server_pub = threading.Thread(target=ServerPub, args=(dbLock,db,cursor,socketServer,socketPub,socketClient,PortClientAssigned,portClientLock))
     sub = threading.Thread(target=Sub, args=(dbLock,db,cursor,socketSub,serverPort))
     
     server_pub.start()
@@ -121,14 +150,15 @@ def Shard(dbLock,serverPort,PubPort,IP1,IP2,NProcesses,firstPortSecondShard,firs
     
     server_pub.join()
     sub.join()
+
     
 portServer=5000
 portPub = 5030
 ### ports should be the same , instead i should takes IPs of the other 2 machines
 SecondShard = 5030
 ThirdShard = 5030
-IP1=sys.argv[1]
-IP2=sys.argv[2]
+IPShard2=sys.argv[1]
+IPShard3=sys.argv[2]
 #IP1='localhost'
 #IP2='localhost'
 IPMaster=sys.argv[3]
@@ -137,10 +167,12 @@ n=3
 if __name__ == '__main__':
     dbLock = Lock()
     p=[]
+    PortClientAssigned = Value('h',portMaster) # if master connection is 3000 , begin to assign ports to client from 3001
+    portClientLock = Lock()
     for i in range (n):
         ser=portServer+i
         pub=portPub+i
-        p.append(Process(target=Shard,args=(dbLock,ser,pub,IP1,IP2,n,SecondShard,ThirdShard)))
+        p.append(Process(target=Shard,args=(dbLock,ser,pub,IPShard2,IPShard3,3,SecondShard,ThirdShard,IPMaster,portMaster,PortClientAssigned,portClientLock)))
         p[i].start()
 
         

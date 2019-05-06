@@ -172,8 +172,6 @@ if __name__ == '__main__':
     for i in range (3):
         ser=portServer+i
         pub=portPub+i
-#        sec = firstPortSecondShard+i
-#        thir = firstPortThirdShard+i
         p.append(Process(target=Shard,args=(dbLock,ser,pub,IPShard2,IPShard3,3,SecondShard,ThirdShard,IPMaster,portMaster,PortClientAssigned,portClientLock)))
         p[i].start()
 

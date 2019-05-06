@@ -1,0 +1,5 @@
+* To run clientF from the client let the client take the 3 IPS of the 3 shards give the array to UserAuthenticate  (thats it for clientF)
+
+* To run shardF.py give it the other 2 ips , the master ip , the port of master (sys argv)
+
+
