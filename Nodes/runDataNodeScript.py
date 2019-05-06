@@ -1,7 +1,7 @@
 import sys
 from multiprocessing import Process, Manager
 from Nodes_client import main as nodeMain
-from nodereplicate import main as repMain
+from nodereplicate import replicate as repMain
 
 if __name__ == '__main__':
 	node1 = Process(target = nodeMain, args = (sys.argv[1], "2001", "2002", "2003", "2004", "2005"))
@@ -14,9 +14,9 @@ if __name__ == '__main__':
 	node3.start()
 
 	replicate = Process(target = repMain, args = (sys.argv[2],sys.argv[3]))
-    replicate.start()
+	replicate.start()
 
 	node1.join()
 	node2.join()
 	node3.join()
-    replicate.join()
+	replicate.join()
