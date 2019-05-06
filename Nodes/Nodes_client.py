@@ -145,7 +145,7 @@ def replicate(context, port):
     return
 
 ########################################################## 
-def main(aliveP, upldP, successP, dwnldP, replServerP)
+def main(aliveP, upldP, successP, dwnldP, replServerP):
 
     context = zmq.Context()
     success = initConn(context, successP)    
@@ -160,7 +160,7 @@ def main(aliveP, upldP, successP, dwnldP, replServerP)
     replicationThread.start()
 
     t1.start()
-    t2.start()
+    # t2.start()
 
     return
 
