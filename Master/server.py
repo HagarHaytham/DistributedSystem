@@ -94,15 +94,18 @@ def success(context, LookUpTable, Nports, loc, socketClient, username, files):
 
 ###############################################################################
 def updateUserLookup(LookUpTable, filename, username,i,files):
-    
+    temp = dict()
     if(username not in LookUpTable[str(i)][0]): #if user already exists
-        temp = [{},'']
+        temp= {str(i) :[{'':[]}, '']}
+        
     else: #if new user
         temp = LookUpTable[str(i)]
     
     newFile = [username,filename]
     files.append(newFile) #dumy array for replicate
+
     temp[0][username].append(filename)
+    
     print(temp,i)
     LookUpTable[str(i)] = temp
     print(LookUpTable)
