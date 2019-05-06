@@ -34,7 +34,7 @@ def handleClient(context, Nports,LookUpTable, newPort, username, files):
 
         if(choice == '1'):
             upld(context, Nports,LookUpTable, socketClient, username, files)
-        
+ 
         elif(choice == '2'):
             show(context,LookUpTable,socketClient, username)
             
@@ -50,14 +50,14 @@ def upld(context, Nports,LookUpTable, socketClient, username, files):
 
     loc = 0
     for i in range(len(Nports)):
-        if Nports[i][6] == 'A':
-            if Nports[i][7] == 'A':
+        if Nports[i][7] == 'A':
+            if Nports[i][8] == 'A':
                 loc = i
-                Nports[i][7] = 'B'
-                print(Nports[loc][1])
+                Nports[i][8] = 'B'
+                print(Nports[loc][2])
                 break
                 
-    socketClient.send_string(Nports[loc][1])
+    socketClient.send_string(Nports[loc][2])
     
     #time.sleep(1)
     print ("Reply is sent... ")
@@ -68,14 +68,14 @@ def upld(context, Nports,LookUpTable, socketClient, username, files):
 def success(context, Nports,LookUpTable, loc, socketClient, username, files):
     
     dataNodeSocket = context.socket(zmq.REP)
-    dataNodeSocket.bind ("tcp://*:%s" % Nports[loc][2])
+    dataNodeSocket.bind ("tcp://*:%s" % Nports[loc][3])
     
     succ, filename = (dataNodeSocket.recv_string()).split()
     print(succ)
     dummy = socketClient.recv_string()
 
     socketClient.send_string("success")
-    Nports[loc][7] = 'A'
+    Nports[loc][8] = 'A'
     
     if(succ == 'Success'):
         #TODO call lookup table to add file
@@ -112,10 +112,7 @@ def Nodes(context,Nports,NportsIp,LookUpTable): #sending alive to server
             LookUpTable[i][1] = string
        
         time.sleep(1)
-#        topic, IP = string.split()
-#        print (topic, IP)
-    
-    
+
 ###############################################################################
 def show(context,LookUpTable,socketClient, username):
     arr = ""
@@ -135,10 +132,6 @@ def show(context,LookUpTable,socketClient, username):
     return
 
 ###############################################################################
-def dwnld(socketClient, username):
-    return
-
-###############################################################################
 def runReplicate(context, rPorts, files,LookUpTable):
     while True:
         replicate(context, rPorts, files,LookUpTable)
@@ -146,11 +139,6 @@ def runReplicate(context, rPorts, files,LookUpTable):
     return
 
 ###############################################################################
-
-def show(socketClient, username):
-    return
-
-
 def dwnld(socketClient, username, filename):
 
     while True:
@@ -202,25 +190,49 @@ def main(LookUpTable, Nports, files, dbPort):
 	print('/n/n')
     
 	
-	clientThreads = []
+    clientThreads = []
+    context = zmq.Context()
+    socketDB = initConnDB(context, dbPort)
     NodeThread = []
-    
-    for i in range(3):
-        NodeThread.append(threading.Thread(target=Nodes,args=(context,Nports,NportsIp,LookUpTable))) #alivePort
-        NodeThread[i].start()
+    print('All', '\n\n')
+
+     for i in range(3):
+         NodeThread.append(threading.Thread(target=Nodes,args=(context,Nports[:][:][0:1],LookUpTable))) #alivePort
+         NodeThread[i].start()
+
 
     # replicationThread = threading.Thread(target = runReplicate, args = (context, replicationPorts, allFiles, LookUpTable))
 
-	while True:
-        
-		newPort, clientUsername = (socketDB.recv_string()).split()
-		print(newPort, clientUsername)
-		socketDB.send_string("recived port Successfully")
+    while True:
+        newPort, clientUsername = (socketDB.recv_string()).split()
+        print(newPort, clientUsername)
+        socketDB.send_string("recived port Successfully")
+
+        clientThreads.append(threading.Thread(target = handleClient,args=(context, LookUpTable, newPort, clientUsername)))
+        clientThreads[-1].start()
+
+    return
+
 
 		clientThreads.append(threading.Thread(target = handleClient,args=(context,Nports, LookUpTable, newPort, clientUsername,files)))
 		clientThreads[-1].start()
 
-	return
+# for i in range(len(Nports)):
 
+    #use example of lookup table
+    # temp = temp = Nports[0]
+    # if(dbPort == "3000"):
+    #   temp[0][0] = "blaaaah"
+        
+    # elif(dbPort == "3001"):
+    #   temp[0][1] = 'a'
+        
+    # else:
+    #   temp[0][2] = 'qrrrr'
+        
+    # Nports[0] = temp
 
+    # print('/n/n')
+    # print(Nports[0], Nports[1], Nports[2])
+    # print('/n/n')
 
