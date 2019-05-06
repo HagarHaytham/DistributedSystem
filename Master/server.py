@@ -11,19 +11,18 @@ import random
 import threading
 from multiprocessing import Process
 
-
 def initConnDB(context, dbPort):
     socketDB = context.socket(zmq.REP)
     socketDB.bind("tcp://*:%s" %dbPort)
     return socketDB
 
-
+###############################################################################
 def initClient(context,newPort):
     clientSocket = context.socket(zmq.REP)
     clientSocket.bind("tcp://*:%s" %newPort)
     return clientSocket
 
-
+###############################################################################
 #connect to default port of server from db, connect to this port w send username
 def handleClient(context, Nports, newPort, username):
     print("enter handle")
@@ -37,13 +36,12 @@ def handleClient(context, Nports, newPort, username):
             upld(Nports, socketClient, username)
         
         elif(choice == '2'):
-            show(socketClient, username)
+            show(context,LookUpTable,socketClient, username)
             
         elif(choice == '3'):
             dwnld(Nports, socketClient, username)
         
         return
-
 
 def upld(context, Nports, socketClient, username):
     #pick machine random and choose random port alive
@@ -58,15 +56,16 @@ def upld(context, Nports, socketClient, username):
                 Nports[i][7] = 'B'
                 print(Nports[loc][1])
                 break
-    
-    #send port to client
+                
     socketClient.send_string(Nports[loc][1])
+    
     #time.sleep(1)
     print ("Reply is sent... ")
     success(context,Nports, loc, socketClient,username)
 
+###############################################################################
 
-def success(Nports, loc, socketClient, username):
+def success(context, Nports, loc, socketClient, username):
     
     dataNodeSocket = context.socket(zmq.REP)
     dataNodeSocket.bind ("tcp://*:%s" % Nports[loc][2])
@@ -74,13 +73,77 @@ def success(Nports, loc, socketClient, username):
     succ, filename = (dataNodeSocket.recv_string()).split()
     print(succ)
     dummy = socketClient.recv_string()
+
     socketClient.send_string("success")
     Nports[loc][7] = 'A'
+    
     #if(succ == 'Success'):
         #TODO call lookup table to add file
-        #updateLookup(LookUpTable, filename, username)
+        #updateUserLookup(LookUpTable, filename, username,loc)
     return
 
+###############################################################################
+def updateUserLookup(LookUpTable, filename, username,loc):
+    
+    if(username in LookUpTable[loc][0]): #if user already exists
+        temp = LookUpTable[i][0][username]
+    else: #if new user
+        temp = []
+        
+    temp.append(filename)
+    LookUpTable[i][0][username] = temp
+    return 
+    
+###############################################################################
+def Nodes(context,Nports,LookUpTable): #sending alive to server
+    #connecting to Nodes
+    socketNode = context.socket(zmq.SUB)
+    print("conecting to nodes...")
+    socketNode.connect ("tcp://localhost:%s" % port1)
+    while 1:
+     #connecting to Nodes
+        socketNode.setsockopt_string(zmq.SUBSCRIBE, "ALIVE")
+        #NEED timeout
+        string = socketNode.recv_string()
+        #
+        #print("recieved ",string )
+        time.sleep(1)
+        topic, IP = string.split()
+        print (topic, IP)
+    
+###############################################################################
+def updateAliveLookup(LookUpTable, live, username,loc):
+    
+###############################################################################
+def show(context,LookUpTable,socketClient, username):
+    arr = ""
+    for i in range(len(LookUpTable)):
+        if(username in LookUpTable[i][0]):
+            userFiles = LookUpTable[i][0][username] 
+            for j in range(len(userFiles)):
+                arr += userFiles[j]
+                arr += '\n'
+       
+    print(arr)
+    if(arr == ""):
+        arr = "You don't have any files, choose upload to add files"
+        
+    socketClient.send_string(arr)
+        
+    return
+
+###############################################################################
+def dwnld(socketClient, username):
+    return
+
+###############################################################################
+def runReplicate(context, rPorts, files,LookUpTable):
+    while True:
+        replicate(context, rPorts, files,LookUpTable)
+        time.sleep(100000)
+    return
+
+###############################################################################
 
 def show(socketClient, username):
     return
@@ -110,7 +173,7 @@ def getDwnldList(fileName):
 #     return
                 
 
-#############################################################
+###############################################################################
 def main(LookUpTable, Nports, dbPort): 
 
 	# print(LookUpTable, Nports)
@@ -135,11 +198,16 @@ def main(LookUpTable, Nports, dbPort):
 	print('/n/n')
 	print(Nports[0], Nports[1], Nports[2])
 	print('/n/n')
-
-#    NodeThread = threading.Thread(target=Nodes,args=(context)) 
-#    NodeThread.start()
+    
 	
 	clientThreads = []
+    NodeThread = []
+    
+    for i in range(3):
+        NodeThread.append(threading.Thread(target=Nodes,args=(context,Nports,LookUpTable))) #alivePort
+        NodeThread[i].start()
+
+    # replicationThread = threading.Thread(target = runReplicate, args = (context, replicationPorts, allFiles, LookUpTable))
 
 	while True:
         

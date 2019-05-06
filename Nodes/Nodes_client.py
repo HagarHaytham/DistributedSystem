@@ -34,8 +34,11 @@ def initConn(context, successPort):
     
 ##########################################################
 
-def alive(serverSocket):
-
+def alive(context,aliveP):
+    
+    serverSocket = context.socket(zmq.PUB)
+    serverSocket.bind("tcp://*:%s" % aliveP)
+    print ("connecting to Server...")
     while (1):
        
         topicfilter = socket.gethostbyname(socket.gethostname())
@@ -48,17 +51,13 @@ def alive(serverSocket):
 ##########################################################
 
 def upload(uplS,succ):
-    #connect to client
-#    port = sys.argv[2]
-#    clientSocket = context.socket(zmq.REP)
-#    clientSocket.bind("tcp://*:%s" % port)
-    #####################################
-    
+    #connect to client 
     print ("connecting to client...")
+    #recv file name
     file= uplS.recv_string()
     print("recieved file name ",file)
     uplS.send_string('Thank you for connecting') 
-    
+    #recv video
     l = uplS.recv()
     uplS.send_string('dummy')
     #time.sleep(1)
@@ -69,11 +68,10 @@ def upload(uplS,succ):
     
     msg="Success " + file
     succ.send_string(msg)
-    #serverSocket1.send_string(file)
-    #time.sleep(1)
     print(msg)
 
     return
+
 
 def dwnld(dwnldS):
 
@@ -83,7 +81,8 @@ def dwnld(dwnldS):
         time.sleep (1)
         dwnldS.send_string("World from ..." )
     return
-
+##########################################################
+    
 def replicate(context, port):
     
     while True:
@@ -148,34 +147,27 @@ def replicate(context, port):
 ########################################################## 
 def main(aliveP, upldP, successP, dwnldP, replServerP)
 
-    
     context = zmq.Context()
     success = initConn(context, successP)    
     
     
     uplS,dwnldS = connectClients(context, upldP, dwnldP)
-    # repPort = sys.argv[4]
     
     t1 = threading.Thread(target=upload,args=(uplS,success)) 
     t2 = threading.Thread(target=alive, args = (aliveP))
     dwnldThread = threading.Thread(target=dwnld,args=(dwnldS))
     replicationThread = threading.Thread(target = replicate, args = (context, replServerP))
     replicationThread.start()
-    #connecting to server
-#    port1 = "5555"
-    
-    serverSocket = context.socket(zmq.PUB)
-#    serverSocket.bind("tcp://*:%s" % port1)
-#    print ("connecting to Server...")
 
     t1.start()
-    #t2.start()
+    t2.start()
 
+    return
 
 if __name__=='__main__':
     p=[]
     for i in range(3):
-        p.append(Process(target=main,args=(sys.argv[1],sys.argv[2],sys.argv[3],sys.argv[4])))
+        p.append(Process(target=main,args=(sys.argv[1],sys.argv[2],sys.argv[3],sys.argv[4],sys.argv[5])))
         p[i].start()
         
 
