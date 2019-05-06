@@ -34,9 +34,6 @@ def handleClient(context, LookUpTable, Nports, newPort, username, files):
         socketClient.send_string('dummy')
 
         if(choice == '1'):
-            socketClient.recv_string("dummy")
-            reply = socketID.recv_string()
-
             upld(context, LookUpTable, Nports, socketClient, username, files)
  
         elif(choice == '2'):
@@ -57,7 +54,9 @@ def upld(context, LookUpTable, Nports, socketClient, username, files):
         if Nports[i%3][i][7] == 'A':
             if Nports[i%3][i][8] == 'A':
                 loc = i
-                Nports[i%3][i][8] = 'B'
+                state = 'B'
+                Nports[i%3][i][8] = state
+                print(Nports[i%3][i][8])
                 print(Nports[i%3][loc][2])
                 break
                 
@@ -77,11 +76,15 @@ def success(context, LookUpTable, Nports, loc, socketClient, username, files):
     dataNodeSocket.bind ("tcp://*:%s" % Nports[loc%3][loc][3])
     
     succ, filename = (dataNodeSocket.recv_string()).split()
+    dataNodeSocket.send_string("dummy")
+
     print(succ, filename)
     dummy = socketClient.recv_string()
 
     socketClient.send_string("success")
-    Nports[loc%3][loc][8] = 'A'
+    state = 'A'
+    Nports[loc%3][loc][8] = state
+    print("Nports", Nports[loc%3][loc][8])
     
     if(succ == 'Success'):
         #TODO call lookup table to add file
@@ -91,15 +94,21 @@ def success(context, LookUpTable, Nports, loc, socketClient, username, files):
 
 ###############################################################################
 def updateUserLookup(LookUpTable, filename, username,i,files):
-    
-    if(username in LookUpTable[i][0]): #if user already exists
-        temp = LookUpTable[i][0][username]
+    temp = dict()
+    if(username not in LookUpTable[str(i)][0]): #if user already exists
+        temp= {str(i) :[{'':[]}, '']}
+        
     else: #if new user
-        temp = []
+        temp = LookUpTable[str(i)]
     
-    files.append(filename) #dumy array for replicate
-    temp.append(filename)
-    LookUpTable[i][0][username] = temp
+    newFile = [username,filename]
+    files.append(newFile) #dumy array for replicate
+
+    temp[0][username].append(filename)
+    
+    print(temp,i)
+    LookUpTable[str(i)] = temp
+    print(LookUpTable)
     return 
     
 ###############################################################################
@@ -127,8 +136,10 @@ def Nodes(context, aliveP, Nports, NportsIp, LookUpTable): #sending alive to ser
 def show(context,LookUpTable,socketClient, username):
     arr = ""
     for i in range(len(LookUpTable)):
-        if(username in LookUpTable[i][0]):
-            userFiles = LookUpTable[i][0][username] 
+        if(username not in LookUpTable[str(i)][0]):
+            pass
+        else:
+            userFiles = LookUpTable[str(i)][0][username] 
             for j in range(len(userFiles)):
                 arr += userFiles[j]
                 arr += '\n'
@@ -137,8 +148,9 @@ def show(context,LookUpTable,socketClient, username):
     if(arr == ""):
         arr = "You don't have any files, choose upload to add files"
         
+    socketClient.recv_string()
     socketClient.send_string(arr)
-        
+    
     return
 
 ###############################################################################
@@ -167,6 +179,7 @@ def getDwnldList(fileName):
 #         time.sleep(100000)
 #     return
                 
+
 
 ###############################################################################
 def main(LookUpTable, Nports, files, dbPort): 

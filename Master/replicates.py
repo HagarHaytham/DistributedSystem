@@ -10,64 +10,65 @@ import zmq
 import time
 
 #updated when a file is uploaded
-files = ["name.mp4","name2.mp4","name3.mp4","name4.mp4","name5.mp4","name6.mp4"]
-
-file02 =[]
-file02.append("name.mp4")
-file02.append("name6.mp4")
-
-file03 =[]
-file03.append("name2.mp4")
-
-file11 =[]
-file11.append("name3.mp4")
-
-file12 =[]
-file12.append("name.mp4")
-
-file13 =[]
-file13.append("name4.mp4")
-file13.append("name2.mp4")
-
-
-file21 =[]
-file21.append("name5.mp4")
-
-file22 =[]
-file22.append("name6.mp4")
-file22.append("name.mp4")
-
-
-
-user0 ={}
-user0[2]=file02
-user0[3]=file03
-
-user1 ={}
-user1[1]=file11
-user1[2]=file12
-user1[3]=file13
-
-user2 ={}
-user2[1]=file21
-user2[2]=file22
-
-alive='Y'
-Nalive='N'
-node0 = [user0,alive]
-node1 = [user1,alive]
-node2 = [user2,alive]
-
-LookUpTable={}
-
-LookUpTable[0]=node0
-LookUpTable[1]=node1
-LookUpTable[2]=node2
-#print(LookUpTable)
-#Nports = [[["1500",'Y','A'],["2000",'N','A'],["3000",'Y','A']],[["4000",'Y','A'],["5000",'Y','A'],["6000",'Y','A']],[["7000",'Y','A'],["9100",'Y','A'],["9000",'Y','A']]]
-rPorts = [["localhost","6000",'A'],["localhost","6100",'A'],["localhost","6200",'A']]
-sPorts = [["localhost","7000",'A'],["localhost","7100",'A'],["localhost","7200",'A']]
-#ports that will recieve copies
+#files = [[2,"name.mp4"],[3,"name2.mp4"],[2,"name6.mp4"],[1,"name3.mp4"],[2,"name3.mp4"],[3,"name4.mp4"],[1,"name5.mp4"],[2,"name6.mp4"]]
+#
+#file02 =[]
+#file02.append("name.mp4")
+#file02.append("name6.mp4")
+#file02.append("name3.mp4")
+#
+#file03 =[]
+#file03.append("name2.mp4")
+#
+#file11 =[]
+#file11.append("name3.mp4")
+#
+#file12 =[]
+#file12.append("name.mp4")
+#
+#file13 =[]
+#file13.append("name4.mp4")
+#file13.append("name2.mp4")
+#
+#
+#file21 =[]
+#file21.append("name5.mp4")
+#
+#file22 =[]
+#file22.append("name6.mp4")
+#file22.append("name.mp4")
+#
+#
+#
+#user0 ={}
+#user0[2]=file02
+#user0[3]=file03
+#
+#user1 ={}
+#user1[1]=file11
+#user1[2]=file12
+#user1[3]=file13
+#
+#user2 ={}
+#user2[1]=file21
+#user2[2]=file22
+#
+#alive='Y'
+#Nalive='N'
+#node0 = [user0,alive]
+#node1 = [user1,alive]
+#node2 = [user2,alive]
+#
+#LookUpTable={}
+#
+#LookUpTable[0]=node0
+#LookUpTable[1]=node1
+#LookUpTable[2]=node2
+##print(LookUpTable)
+##Nports = [[["1500",'Y','A'],["2000",'N','A'],["3000",'Y','A']],[["4000",'Y','A'],["5000",'Y','A'],["6000",'Y','A']],[["7000",'Y','A'],["9100",'Y','A'],["9000",'Y','A']]]
+#rPorts = [["localhost","6000",'A'],["localhost","6100",'A'],["localhost","6200",'A']]
+#sPorts = [["localhost","7000",'A'],["localhost","7100",'A'],["localhost","7200",'A']]
+##ports that will recieve copies
 
 
 #port that will send copies
@@ -93,12 +94,12 @@ def main(LookUpTable,files,rPorts,sPorts):
             for node in LookUpTable:
                 for user in LookUpTable[node][0]:
                     for q in range(len(LookUpTable[node][0][user])):
-                        if(LookUpTable[node][0][user][q] == files[i]):
+                        if(LookUpTable[node][0][user][q] == files[i][1] and user == files[i][0] ):
                             fCount += 1
                             nodes.append(node)
                             nodesToHave.append(node)
                             fUser = user
-            print("nodes that have "+files[i] +": "+str(nodes))
+            print("nodes that have "+files[i][1] +"of "+files[i][0]+": "+str(nodes))
             
             
             # getting nodes to be copied to 
@@ -119,9 +120,12 @@ def main(LookUpTable,files,rPorts,sPorts):
                                 serPort1 = sPorts[node][1]
                                 #updating in lookup table
                                 if (fUser not in LookUpTable[node][0] ):
-                                    LookUpTable[node][0][fUser] = [files[i]]
+                                    LookUpTable[node][0][fUser] = [files[i][1]]
                                 else:
-                                    LookUpTable[node][0][fUser].append(files[i])
+                                    temp = LookUpTable[node][0][fUser]
+                                    #LookUpTable[node][0][fUser]
+                                    temp.append(files[i][1])
+                                    LookUpTable[node][0][fUser] = temp
                                     
                                 dstNode1 = node
                                 nodesToHave.append(node)
@@ -137,9 +141,12 @@ def main(LookUpTable,files,rPorts,sPorts):
 
                                     #updating in lookup table
                                     if (fUser not in LookUpTable[node][0] ):
-                                        LookUpTable[node][0][fUser] = [files[i]]
+                                        LookUpTable[node][0][fUser] = [files[i][1]]
                                     else:
-                                        LookUpTable[node][0][fUser].append(files[i])       
+                                        temp = LookUpTable[node][0][fUser]
+                                        #LookUpTable[node][0][fUser]
+                                        temp.append(files[i][1])
+                                        LookUpTable[node][0][fUser] = temp
                                     
                                     dstNode2 = node
                                                            
@@ -182,7 +189,7 @@ def main(LookUpTable,files,rPorts,sPorts):
                 senderSocket.send_string(dstport2)
                 print(senderSocket.recv_string())
         
-                senderSocket.send_string(files[i])
+                senderSocket.send_string(files[i][1])
                 print(senderSocket.recv_string())
         
                 if(dstport1 != ""):
@@ -192,7 +199,7 @@ def main(LookUpTable,files,rPorts,sPorts):
                     recSocket1.send_string("r")
                     print(recSocket1.recv_string())
             
-                    recSocket1.send_string(files[i])
+                    recSocket1.send_string(files[i][1])
                     recSocket1.close()
                 else:
                     print ("can't repicate, there is no alive nodes")
@@ -205,7 +212,7 @@ def main(LookUpTable,files,rPorts,sPorts):
                     recSocket2.send_string("r")   
                     print(recSocket2.recv_string())
             
-                    recSocket2.send_string(files[i])
+                    recSocket2.send_string(files[i][1])
                     recSocket2.close()
                     
                 senderSocket.send_string("master: Done Notifying... ")
@@ -215,10 +222,10 @@ def main(LookUpTable,files,rPorts,sPorts):
                 rPorts[srcNode][2] = 'A'
                 rPorts[dstNode1][2] = 'A'
                 rPorts[dstNode2][2] = 'A'
-                
+        print(LookUpTable)
         time.sleep(10)    
-main(LookUpTable,files,rPorts,sPorts)    
-#print(LookUpTable)
+#main(LookUpTable,files,rPorts,sPorts)    
+#
 #print(rPorts)            
             
     
