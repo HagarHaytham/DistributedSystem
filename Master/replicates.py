@@ -66,6 +66,7 @@ LookUpTable[2]=node2
 #print(LookUpTable)
 #Nports = [[["1500",'Y','A'],["2000",'N','A'],["3000",'Y','A']],[["4000",'Y','A'],["5000",'Y','A'],["6000",'Y','A']],[["7000",'Y','A'],["9100",'Y','A'],["9000",'Y','A']]]
 rPorts = [["localhost","6000",'A'],["localhost","6100",'A'],["localhost","6200",'A']]
+sPorts = [["localhost","7000",'A'],["localhost","7100",'A'],["localhost","7200",'A']]
 #ports that will recieve copies
 
 
@@ -79,6 +80,8 @@ def main(LookUpTable,files,rPorts):
         for i in range(len(files)):
             srcIP = ""
             srcport = ""
+            serPort1 = ""
+            serPort2 = ""
             dstIP1 = ""
             dstport1 = ""
             dstIP2 = ""
@@ -113,6 +116,7 @@ def main(LookUpTable,files,rPorts):
                                 dstIP1 = rPorts[node][0]
                                 dstport1 = rPorts[node][1]
                                 rPorts[node][2] == 'B'
+                                serPort1 = sPorts[node][1]
                                 #updating in lookup table
                                 if (fUser not in LookUpTable[node][0] ):
                                     LookUpTable[node][0][fUser] = [files[i]]
@@ -129,6 +133,8 @@ def main(LookUpTable,files,rPorts):
                                     dstIP2 = rPorts[node][0]
                                     dstport2 = rPorts[node][1]
                                     rPorts[node][2] == 'B'
+                                    serPort2 = sPorts[node][1]
+
                                     #updating in lookup table
                                     if (fUser not in LookUpTable[node][0] ):
                                         LookUpTable[node][0][fUser] = [files[i]]
@@ -148,7 +154,7 @@ def main(LookUpTable,files,rPorts):
                     while (srcport == "" ):
                         if (LookUpTable[nodes[k]][1] == 'Y' and rPorts[nodes[k]][2] == 'A'):
                             srcIP = rPorts[nodes[k]][0]
-                            srcport = rPorts[nodes[k]][1]
+                            srcport = sPorts[nodes[k]][1]
                             rPorts[nodes[k]][2] == 'B'
                             
                             srcNode = nodes[k]
@@ -156,7 +162,7 @@ def main(LookUpTable,files,rPorts):
                             break
                         
                         
-                     
+                   
                 # notifying sender 
                 context = zmq.Context()
                 senderSocket = context.socket(zmq.REQ)
@@ -182,7 +188,7 @@ def main(LookUpTable,files,rPorts):
                 if(dstport1 != ""):
                     print("Notifying reciever1...")
                     recSocket1 = context.socket(zmq.REQ)
-                    recSocket1.connect ("tcp://%s:%s" % (dstIP1,dstport1))
+                    recSocket1.connect ("tcp://%s:%s" % (dstIP1,serPort1))
                     recSocket1.send_string("r")
                     print(recSocket1.recv_string())
             
@@ -195,7 +201,7 @@ def main(LookUpTable,files,rPorts):
                 if(dstport2 != ""):
                     print("Notifying reciever2...")
                     recSocket2 = context.socket(zmq.REQ)
-                    recSocket2.connect ("tcp://localhost:%s" % dstport2)
+                    recSocket2.connect ("tcp://%s:%s" % (dstIP2,serPort2))
                     recSocket2.send_string("r")   
                     print(recSocket2.recv_string())
             
