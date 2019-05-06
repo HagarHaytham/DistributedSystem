@@ -42,9 +42,9 @@ def alive(context,aliveP):
     while (1):
        
         topicfilter = socket.gethostbyname(socket.gethostname())
-        topicfilter+= "@" + port1
-        messagedata = "ALIVE"
-        serverSocket.send_string("%s %s" % (messagedata, topicfilter))
+        topicfilter+= ":" + aliveP
+        messagedata = "A"
+        serverSocket.send_string("%s %s" % (topicfilter, messagedata ))
         time.sleep(1)
         print(topicfilter)
         
@@ -145,7 +145,7 @@ def replicate(context, port):
     return
 
 ########################################################## 
-def main(aliveP, upldP, successP, dwnldP, replServerP)
+def main(aliveP, upldP, successP, dwnldP, replServerP):
 
     context = zmq.Context()
     success = initConn(context, successP)    
