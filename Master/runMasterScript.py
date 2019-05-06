@@ -8,7 +8,9 @@ if __name__ == '__main__':
 	lookupTable = manager.dict()
 	Nports = manager.list()
 
-	lookupTable[0] = [{'':[]}, '']
+	lookupTable[0] = [{'':[]}, 'A']
+    lookupTable[1] = [{'':[]}, 'A']
+    lookupTable[2] = [{'':[]}, 'A']
 	seed = 2001
 
 	for i in range(3):
