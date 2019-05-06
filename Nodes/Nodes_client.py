@@ -9,31 +9,28 @@ import time
 import sys
 import socket
 import threading
+from multiprocessing import Process
 
 file = ""
 
-def connectClients(context):
+def connectClients(context, uplPort, dnlwdPort):
     
     #connect client
-    uplPort = sys.argv[2]
     uplSocket = context.socket(zmq.REP)
     uplSocket.bind ("tcp://*:%s" % uplPort)
     
-    
-    dnlwdPort = sys.argv[3]
     dnlwdSocket = context.socket(zmq.REP)
     dnlwdSocket.bind ("tcp://*:%s" % dnlwdPort)
         
     return uplSocket,dnlwdSocket
     
 
-def initConn(context):
+def initConn(context, successPort):
     #connect server
-    serverPort = sys.argv[1]
-    serverSocket = context.socket(zmq.REQ)
-    serverSocket.connect ("tcp://localhost:%s" % serverPort)
+    successSocket = context.socket(zmq.REQ)
+    successSocket.connect ("tcp://localhost:%s" % successPort)
     
-    return serverSocket
+    return successSocket
     
 ##########################################################
 
@@ -57,26 +54,25 @@ def upload(uplS,succ):
 #    clientSocket.bind("tcp://*:%s" % port)
     #####################################
     
-    while True:
-        print ("connecting to client...")
-        file= uplS.recv_string()
-        print("recieved file name ",file)
-        uplS.send_string('Thank you for connecting') 
-        
-        l = uplS.recv()
-        uplS.send_string('dummy')
-        #time.sleep(1)
-        f = open(file,'wb')
-        f.write(l)
-        f.close()
-        print ("Done Receiving")
-        
-        msg="Success " + file
-        succ.send_string(msg)
-        #serverSocket1.send_string(file)
-        #time.sleep(1)
-        print(msg)
+    print ("connecting to client...")
+    file= uplS.recv_string()
+    print("recieved file name ",file)
+    uplS.send_string('Thank you for connecting') 
     
+    l = uplS.recv()
+    uplS.send_string('dummy')
+    #time.sleep(1)
+    f = open(file,'wb')
+    f.write(l)
+    f.close()
+    print ("Done Receiving")
+    
+    msg="Success " + file
+    succ.send_string(msg)
+    #serverSocket1.send_string(file)
+    #time.sleep(1)
+    print(msg)
+
     return
 
 def dwn(uplS):
@@ -144,19 +140,21 @@ def replicate(context, port):
     return
 
 ########################################################## 
-if __name__ == "__main__":
+def main(aliveP, upldP, successP, dwnldP, replServerP)
 
     
     context = zmq.Context()
-    success = initConn(context)    
+    success = initConn(context, successP)    
     
-    uplS,dwnldS = connectClients(context)
-    repPort = sys.argv[4]
+    
+    uplS,dwnldS = connectClients(context, upldP, dwnldP)
+    # repPort = sys.argv[4]
     
     t1 = threading.Thread(target=upload,args=(uplS,success)) 
-    t2 = threading.Thread(target=alive, args = (success))
+    t2 = threading.Thread(target=alive, args = (aliveP))
     t3 = threading.Thread(target=dwn,args=(dwnldS))
-    replicationThread = threading.Thread(target = replicate, args = (context, repPort))
+    replicationThread = threading.Thread(target = replicate, args = (context, replServerP))
+    replicationThread.start()
     #connecting to server
 #    port1 = "5555"
     
@@ -165,4 +163,13 @@ if __name__ == "__main__":
 #    print ("connecting to Server...")
 
     t1.start()
-#    t2.start()
+    #t2.start()
+
+
+if __name__=='__main__':
+    p=[]
+    for i in range(3):
+        p.append(Process(target=main,args=(sys.argv[1],sys.argv[2],sys.argv[3],sys.argv[4])))
+        p[i].start()
+        
+
