@@ -81,84 +81,21 @@ def dwnld(dwnldS):
         time.sleep (1)
         dwnldS.send_string("World from ..." )
     return
-##########################################################
-    
-def replicate(context, port):
-    
-    while True:
-        rSocket = context.socket(zmq.REP)
-        rSocket.bind("tcp://*:%s" % port)
-
-        rOrS=rSocket.recv_string()
-        dst1 = ""
-        dst2 = ""
-        file = ""
-        rSocket.send_string("node: your request recieved")
-        if(rOrS == "s"):
-            dst1 = rSocket.recv_string()
-            #time.sleep(5)
-            rSocket.send_string("node: dst1 recieved")
-
-            dst2 = rSocket.recv_string()
-            rSocket.send_string("node: dst2 recieved")
-
-            file = rSocket.recv_string()
-            rSocket.send_string("node: file recieved")
-            
-            print(rSocket.recv_string())
-            
-            time.sleep(5)
-            openedFile = open(file,'rb')
-            readFile = openedFile.read()
-            if(dst1 != ""):
-                dstSocket1 = context.socket(zmq.REQ)
-                dstSocket1.connect("tcp://localhost:%s" % dst1)
-        
-                print("sending first copy..." )
-                dstSocket1.send(readFile)
-                dstSocket1.close()
-                
-            if(dst2 != ""):
-                dstSocket2 = context.socket(zmq.REQ)
-                dstSocket2.connect("tcp://localhost:%s" % dst2) 
-                
-                print("sending second copy..." )
-                dstSocket2.send(readFile)
-                dstSocket2.close()
-                
-            openedFile.close()
-            rSocket.send_string("node: Done replicating")
-            
-        elif(rOrS == "r"):
-            print("replicating...")
-            file = rSocket.recv_string()
-            rSocket.send_string("rep node: file name recieved")
-
-            recFile = rSocket.recv()
-            
-            openedFile = open(file,'wb')
-            openedFile.write(recFile)
-            openedFile.close()
-
-        rSocket.close()
-
-    return
 
 ########################################################## 
-def main(aliveP, upldP, successP, dwnldP, replServerP):
+def main(masterIP, aliveP, upldP, successP, dwnldP, replServerP):
+
+    print('run data node', aliveP)  
 
     context = zmq.Context()
-    success = initConn(context, successP)    
-    
+    success = initConn(context, successP)  
     
     uplS,dwnldS = connectClients(context, upldP, dwnldP)
     
     t1 = threading.Thread(target=upload,args=(uplS,success)) 
     t2 = threading.Thread(target=alive, args = (aliveP))
     dwnldThread = threading.Thread(target=dwnld,args=(dwnldS))
-    replicationThread = threading.Thread(target = replicate, args = (context, replServerP))
-    replicationThread.start()
-
+    
     t1.start()
     # t2.start()
 
