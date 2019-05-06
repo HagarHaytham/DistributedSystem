@@ -75,7 +75,13 @@ def upload(uplS,succ):
 
     return
 
-def dwn(uplS):
+def dwnld(dwnldS):
+
+    while True:
+        message = dwnldS.recv_string()
+        print ("Received request: ", message)
+        time.sleep (1)
+        dwnldS.send_string("World from ..." )
     return
 
 def replicate(context, port):
@@ -152,7 +158,7 @@ def main(aliveP, upldP, successP, dwnldP, replServerP)
     
     t1 = threading.Thread(target=upload,args=(uplS,success)) 
     t2 = threading.Thread(target=alive, args = (aliveP))
-    t3 = threading.Thread(target=dwn,args=(dwnldS))
+    dwnldThread = threading.Thread(target=dwnld,args=(dwnldS))
     replicationThread = threading.Thread(target = replicate, args = (context, replServerP))
     replicationThread.start()
     #connecting to server

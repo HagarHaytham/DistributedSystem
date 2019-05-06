@@ -25,7 +25,7 @@ def initClient(context,newPort):
 
 
 #connect to default port of server from db, connect to this port w send username
-def handleClient(context, LookUpTable, newPort, username):
+def handleClient(context, Nports, newPort, username):
     print("enter handle")
     socketClient = initClient(context,newPort)
     
@@ -34,48 +34,48 @@ def handleClient(context, LookUpTable, newPort, username):
         choice = socketClient.recv_string()
 
         if(choice == '1'):
-            upld(LookUpTable, socketClient, username)
+            upld(Nports, socketClient, username)
         
         elif(choice == '2'):
             show(socketClient, username)
             
         elif(choice == '3'):
-            dwnld(LookUpTable, socketClient, username)
+            dwnld(Nports, socketClient, username)
         
         return
 
 
-def upld(context, LookUpTable, socketClient, username):
+def upld(context, Nports, socketClient, username):
     #pick machine random and choose random port alive
     #random pickNode
     print ("Finding available ports... ")
 
     loc = 0
     for i in range(len(LookUpTable)):
-        if LookUpTable[i][6] == 'A':
-            if LookUpTable[i][7] == 'A':
+        if Nports[i][6] == 'A':
+            if Nports[i][7] == 'A':
                 loc = i
-                LookUpTable[i][7] = 'B'
-                print(LookUpTable[loc][1])
+                Nports[i][7] = 'B'
+                print(Nports[loc][1])
                 break
     
     #send port to client
-    socketClient.send_string(LookUpTable[loc][1])
+    socketClient.send_string(Nports[loc][1])
     #time.sleep(1)
     print ("Reply is sent... ")
-    success(context,LookUpTable, loc, socketClient,username)
+    success(context,Nports, loc, socketClient,username)
 
 
-def success(LookUpTable, loc, socketClient, username):
+def success(Nports, loc, socketClient, username):
     
     dataNodeSocket = context.socket(zmq.REP)
-    dataNodeSocket.bind ("tcp://*:%s" % LookUpTable[loc][2])
+    dataNodeSocket.bind ("tcp://*:%s" % Nports[loc][2])
     
     succ, filename = (dataNodeSocket.recv_string()).split()
     print(succ)
     dummy = socketClient.recv_string()
     socketClient.send_string("success")
-    LookUpTable[loc][7] = 'A'
+    Nports[loc][7] = 'A'
     #if(succ == 'Success'):
         #TODO call lookup table to add file
         #updateLookup(LookUpTable, filename, username)
