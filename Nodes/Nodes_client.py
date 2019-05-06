@@ -34,14 +34,15 @@ def initConn(context, successPort):
     
 ##########################################################
 
-def alive(context,aliveP):
+def alive(context,aliveP,masterIP):
     
     serverSocket = context.socket(zmq.PUB)
     serverSocket.bind("tcp://*:%s" % aliveP)
     print ("connecting to Server...")
     while (1):
        
-        topicfilter = socket.gethostbyname(socket.gethostname())
+        #topicfilter = socket.gethostbyname(socket.gethostname())
+        topicfilter = masterIP
         topicfilter+= ":" + aliveP
         messagedata = "A"
         serverSocket.send_string("%s %s" % (topicfilter, messagedata ))
@@ -93,11 +94,11 @@ def main(masterIP, aliveP, upldP, successP, dwnldP, replServerP):
     uplS,dwnldS = connectClients(context, upldP, dwnldP)
     
     t1 = threading.Thread(target=upload,args=(uplS,success)) 
-    t2 = threading.Thread(target=alive, args = (aliveP))
+    t2 = threading.Thread(target=alive, args = (context,aliveP,masterIP))
     dwnldThread = threading.Thread(target=dwnld,args=(dwnldS))
     
     t1.start()
-    # t2.start()
+    t2.start()
 
     return
 

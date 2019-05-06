@@ -34,6 +34,9 @@ def handleClient(context, LookUpTable, Nports, newPort, username, files):
         socketClient.send_string('dummy')
 
         if(choice == '1'):
+            socketClient.recv_string("dummy")
+            reply = socketID.recv_string()
+
             upld(context, LookUpTable, Nports, socketClient, username, files)
  
         elif(choice == '2'):
@@ -58,6 +61,7 @@ def upld(context, LookUpTable, Nports, socketClient, username, files):
                 print(Nports[i%3][loc][2])
                 break
                 
+    socketClient.recv_string()
     socketClient.send_string(Nports[loc%3][loc][2])
     
     #time.sleep(1)
@@ -103,18 +107,21 @@ def Nodes(context, aliveP, Nports, NportsIp, LookUpTable): #sending alive to ser
     #connecting to Nodes
     socketNode = context.socket(zmq.SUB)
     print("conecting to nodes...")
+    #socketNode.RCVTIMEO = 500
     socketNode.connect ("tcp://localhost:%s" % aliveP)
-    socketNode.RCVTIMEO = 1000
-    while 1:
+    
+    #while 1:
      #connecting to Nodes
-        for i in range(len(NportsIp)):
-            socketNode.setsockopt_string(zmq.SUBSCRIBE, str(NportsIp[i][0]) + ':' + str(NportsIp[i][1]))
-            string= "N"
-            string = socketNode.recv_string()
-            Nports[i][7] = string
-            LookUpTable[i][1] = string
-       
-        time.sleep(1)
+    for i in range(len(NportsIp)):
+        print("enter nodes")
+        socketNode.setsockopt_string(zmq.SUBSCRIBE, str(NportsIp[i][0]) + ':' + str(NportsIp[i][1]))
+        string= "N"
+        string = socketNode.recv_string()
+        print(string)
+        Nports[i][7] = string
+        LookUpTable[i][1] = string
+   
+    time.sleep(1)
 
 ###############################################################################
 def show(context,LookUpTable,socketClient, username):
@@ -167,11 +174,11 @@ def main(LookUpTable, Nports, files, dbPort):
     clientThreads = []
     context = zmq.Context()
     socketDB = initConnDB(context, dbPort)
-    NodeThread = []
+    #NodeThread = []
 
-    # for i in range(3):
-    #     NodeThread.append(threading.Thread(target=Nodes,args=(context, Nports[0][0][1], Nports, Nports[:][:][0:1],LookUpTable))) #alivePort
-    #     NodeThread[i].start()
+    #for i in range(3):
+    # NodeThread= threading.Thread(target=Nodes,args=(context, Nports[0][0][1], Nports, Nports[:][:][0:1],LookUpTable)) #alivePort
+    # NodeThread.start()
 
     # replicationThread = threading.Thread(target = runReplicate, args = (context, replicationPorts, allFiles, LookUpTable))
 
