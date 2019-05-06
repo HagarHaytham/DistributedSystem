@@ -105,7 +105,7 @@ def Nodes(context, aliveP, Nports, NportsIp, LookUpTable): #sending alive to ser
     while 1:
      #connecting to Nodes
         for i in range(len(NportsIp)):
-            socketNode.setsockopt_string(zmq.SUBSCRIBE, NportsIp[i][0] + ':' + NportsIp[i][1])
+            socketNode.setsockopt_string(zmq.SUBSCRIBE, str(NportsIp[i][0]) + ':' + str(NportsIp[i][1]))
             string= "N"
             string = socketNode.recv_string()
             Nports[i][7] = string
@@ -177,7 +177,7 @@ def main(LookUpTable, Nports, files, dbPort):
         print(newPort, clientUsername)
         socketDB.send_string("recived port Successfully")
 
-        clientThreads.append(threading.Thread(target = handleClient,args=(context, LookUpTable, newPort, clientUsername)))
+        clientThreads.append(threading.Thread(target = handleClient,args=(context, LookUpTable, Nports, newPort, clientUsername, files)))
         clientThreads[-1].start()
 
     return
