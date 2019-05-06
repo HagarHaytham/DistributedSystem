@@ -11,9 +11,9 @@ if __name__ == '__main__':
 	Nports = manager.list()
 	files = manager.list()
 
-	lookupTable[0] = [{'':[]}, 'A']
-	lookupTable[1] = [{'':[]}, 'A']
-	lookupTable[2] = [{'':[]}, 'A']
+	lookupTable['0'] = [{'dalia':['LDA.mp4', 'file.mp4']}, 'A']
+	lookupTable['1'] = [{'nada':['small.mp4', '']}, 'A']
+	lookupTable['2'] = [{'dfg':['', '', '','']}, 'A']
 	
 	seed = 2001
 
