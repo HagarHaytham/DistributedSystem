@@ -79,7 +79,7 @@ def replicate(sport,nport):
             #rSocket.close()
             
         
-replicate(7000,6000)
+#replicate(7000,6000)
 
     
     
