@@ -75,7 +75,7 @@ sPorts = [["localhost","7000",'A'],["localhost","7100",'A'],["localhost","7200",
 
 # detecting if a file has less than 3 replicates
 
-def main(LookUpTable,files,rPorts):
+def main(LookUpTable,files,rPorts,sPorts):
     while(1):
         for i in range(len(files)):
             srcIP = ""
@@ -217,7 +217,7 @@ def main(LookUpTable,files,rPorts):
                 rPorts[dstNode2][2] = 'A'
                 
         time.sleep(10)    
-main(LookUpTable,files,rPorts)    
+main(LookUpTable,files,rPorts,sPorts)    
 #print(LookUpTable)
 #print(rPorts)            
             
