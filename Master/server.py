@@ -49,7 +49,7 @@ def upld(context, Nports, socketClient, username):
     print ("Finding available ports... ")
 
     loc = 0
-    for i in range(len(LookUpTable)):
+    for i in range(len(Nports)):
         if Nports[i][6] == 'A':
             if Nports[i][7] == 'A':
                 loc = i
