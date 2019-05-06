@@ -95,14 +95,17 @@ def success(context, LookUpTable, Nports, loc, socketClient, username, files):
 ###############################################################################
 def updateUserLookup(LookUpTable, filename, username,i,files):
     
-    if(username in LookUpTable[i][0]): #if user already exists
-        temp = LookUpTable[i][0][username]
+    if(username not in LookUpTable[str(i)][0]): #if user already exists
+        temp = [{},'']
     else: #if new user
-        temp = []
+        temp = LookUpTable[str(i)]
     
-    files.append(filename) #dumy array for replicate
-    temp.append(filename)
-    LookUpTable[i][0][username] = temp
+    newFile = [username,filename]
+    files.append(newFile) #dumy array for replicate
+    temp[0][username].append(filename)
+    print(temp,i)
+    LookUpTable[str(i)] = temp
+    print(LookUpTable)
     return 
     
 ###############################################################################
@@ -130,8 +133,10 @@ def Nodes(context, aliveP, Nports, NportsIp, LookUpTable): #sending alive to ser
 def show(context,LookUpTable,socketClient, username):
     arr = ""
     for i in range(len(LookUpTable)):
-        if(username in LookUpTable[i][0]):
-            userFiles = LookUpTable[i][0][username] 
+        if(username not in LookUpTable[str(i)][0]):
+            pass
+        else:
+            userFiles = LookUpTable[str(i)][0][username] 
             for j in range(len(userFiles)):
                 arr += userFiles[j]
                 arr += '\n'
@@ -171,6 +176,7 @@ def getDwnldList(fileName):
 #         time.sleep(100000)
 #     return
                 
+
 
 ###############################################################################
 def main(LookUpTable, Nports, files, dbPort): 
