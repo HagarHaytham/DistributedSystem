@@ -1,5 +1,4 @@
 from multiprocessing import Process, Manager
-
 from server import main as serverMain
 
 if __name__ == '__main__':
@@ -17,13 +16,14 @@ if __name__ == '__main__':
 	for i in range(3):
 		temp = []
 		for j in range(3):
-			#[0] = alive port between node and server
-			#[1] = upload port between node and client
-			#[2] = success port between node and server
-			#[3] = download port between node and client
-			#[4] = replicate port between node and server
-			#[5] = replicate port between node and node
-			temp.append([str(seed), str(seed + 1), str(seed + 2), str(seed + 3), str(seed + 4), str(seed + 5), 'A', 'A'])
+			#[0] = ip of machine
+			#[1] = alive port between node and server
+			#[2] = upload port between node and client
+			#[3] = success port between node and server
+			#[4] = download port between node and client
+			#[5] = replicate port between node and server
+			#[6] = replicate port between node and node
+			temp.append([sys.argv[i+1], str(seed), str(seed + 1), str(seed + 2), str(seed + 3), str(seed + 4), str(seed + 5), 'A', 'A'])
 			#shift by 10 for 2nd process
 			seed = seed + 10
 

@@ -33,7 +33,7 @@ def handleClient(context, Nports, newPort, username):
         choice = socketClient.recv_string()
 
         if(choice == '1'):
-            upld(Nports, socketClient, username)
+            upld(context, Nports, socketClient, username)
         
         elif(choice == '2'):
             show(context,LookUpTable,socketClient, username)
@@ -174,7 +174,7 @@ def main(LookUpTable, Nports, dbPort):
     NodeThread = []
 
     # for i in range(3):
-    #     NodeThread.append(threading.Thread(target=Nodes,args=(context,Nports[:][:][0],LookUpTable))) #alivePort
+    #     NodeThread.append(threading.Thread(target=Nodes,args=(context,Nports[:][:][0:1],LookUpTable))) #alivePort
     #     NodeThread[i].start()
 
     # replicationThread = threading.Thread(target = runReplicate, args = (context, replicationPorts, allFiles, LookUpTable))
