@@ -17,6 +17,7 @@ if __name__ == '__main__':
 	lookupTable[2] = [{'':[]}, 'A']
 	files = []	
 	seed = 2001
+	defSeed = 2001
 
 	for i in range(3):
 		temp = []
