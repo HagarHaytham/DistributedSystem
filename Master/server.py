@@ -110,17 +110,17 @@ def Nodes(context, aliveP, Nports, NportsIp, LookUpTable): #sending alive to ser
     #socketNode.RCVTIMEO = 500
     socketNode.connect ("tcp://localhost:%s" % aliveP)
     
-    #while 1:
+    while 1:
      #connecting to Nodes
-    for i in range(len(NportsIp)):
-        print("enter nodes")
-        socketNode.setsockopt_string(zmq.SUBSCRIBE, str(NportsIp[i][0]) + ':' + str(NportsIp[i][1]))
-        string= "N"
-        string = socketNode.recv_string()
-        print(string)
-        Nports[i][7] = string
-        LookUpTable[i][1] = string
-   
+        for i in range(len(NportsIp)):
+            print("enter nodes")
+            socketNode.setsockopt_string(zmq.SUBSCRIBE, str(NportsIp[i][0]) + ':' + str(NportsIp[i][1]))
+            string= "N"
+            string = socketNode.recv_string()
+            print(string)
+            Nports[i][7] = string
+            LookUpTable[i][1] = string
+            print()
     time.sleep(1)
 
 ###############################################################################
