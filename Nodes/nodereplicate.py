@@ -13,11 +13,12 @@ def replicate(sport,nport):
     if len(sys.argv) > 1:
         sport =  int(sys.argv[1])
         nport = int(sys.argv[2])
-        #int(port)
-    while(1):
         context = zmq.Context()
         rSocket = context.socket(zmq.REP)
         rSocket.bind("tcp://*:%s" % sport)
+        #int(port)
+    while(1):
+
         rOrS=rSocket.recv_string()
         dIP1 = ""
         dst1 = ""
@@ -60,7 +61,7 @@ def replicate(sport,nport):
                 dstSocket2.close()
             openedFile.close()
             rSocket.send_string("node: Done replicating")
-            rSocket.close()
+            #rSocket.close()
         elif(rOrS == "r"):
             context = zmq.Context()
             nSocket = context.socket(zmq.REP)
@@ -75,6 +76,7 @@ def replicate(sport,nport):
             openedFile.write(recFile)
             openedFile.close()
             nSocket.close()
+            #rSocket.close()
             
         
 replicate(7000,6000)
