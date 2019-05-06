@@ -12,28 +12,24 @@ import threading
 
 file = ""
 
-def connectClients(context):
+def connectClients(context, uplPort, dnlwdPort):
     
     #connect client
-    uplPort = sys.argv[2]
     uplSocket = context.socket(zmq.REP)
     uplSocket.bind ("tcp://*:%s" % uplPort)
     
-    
-    dnlwdPort = sys.argv[3]
     dnlwdSocket = context.socket(zmq.REP)
     dnlwdSocket.bind ("tcp://*:%s" % dnlwdPort)
         
     return uplSocket,dnlwdSocket
     
 
-def initConn(context):
+def initConn(context, successPort):
     #connect server
-    serverPort = sys.argv[1]
-    serverSocket = context.socket(zmq.REQ)
-    serverSocket.connect ("tcp://localhost:%s" % serverPort)
+    successSocket = context.socket(zmq.REQ)
+    successSocket.connect ("tcp://localhost:%s" % successPort)
     
-    return serverSocket
+    return successSocket
     
 ##########################################################
 
@@ -144,19 +140,20 @@ def replicate(context, port):
     return
 
 ########################################################## 
-if __name__ == "__main__":
+def main(aliveP, upldP, successP, dwnldP, replServerP, repNodeP)
 
     
     context = zmq.Context()
-    success = initConn(context)    
+    success = initConn(context, alive)    
     
-    uplS,dwnldS = connectClients(context)
-    repPort = sys.argv[4]
+    uplS,dwnldS = connectClients(context, upldP, dwnldP)
+    # repPort = sys.argv[4]
     
     t1 = threading.Thread(target=upload,args=(uplS,success)) 
-    t2 = threading.Thread(target=alive, args = (success))
+    t2 = threading.Thread(target=alive, args = (aliveP))
     t3 = threading.Thread(target=dwn,args=(dwnldS))
     replicationThread = threading.Thread(target = replicate, args = (context, repPort))
+    replicationThread.start()
     #connecting to server
 #    port1 = "5555"
     

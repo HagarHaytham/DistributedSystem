@@ -86,10 +86,10 @@ def upld(context, LookUpTable, socketClient, username):
 
     loc = 0
     for i in range(len(LookUpTable)):
-        if LookUpTable[i][3] == 'A':
-            if LookUpTable[i][4] == 'A':
+        if LookUpTable[i][6] == 'A':
+            if LookUpTable[i][7] == 'A':
                 loc = i
-                LookUpTable[i][4] = 'B'
+                LookUpTable[i][7] = 'B'
                 print(LookUpTable[loc][1])
                 break
     
@@ -103,13 +103,13 @@ def upld(context, LookUpTable, socketClient, username):
 def success(context, LookUpTable, loc, socketClient, username):
     
     dataNodeSocket = context.socket(zmq.REP)
-    dataNodeSocket.bind ("tcp://*:%s" % LookUpTable[loc][0])
+    dataNodeSocket.bind ("tcp://*:%s" % LookUpTable[loc][2])
     
     succ, filename = (dataNodeSocket.recv_string()).split()
     print(succ)
     dummy = socketClient.recv_string()
     socketClient.send_string("success")
-    LookUpTable[loc][4] = 'A'
+    LookUpTable[loc][7] = 'A'
     #if(succ == 'Success'):
         #TODO call lookup table to add file
         #updateLookup(LookUpTable, filename, username)
