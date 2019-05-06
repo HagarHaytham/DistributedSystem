@@ -60,8 +60,8 @@ def upld(context, LookUpTable, Nports, socketClient, username, files):
                 print(Nports[i%3][loc][2])
                 break
                 
-    socketClient.send_string(Nports[loc%3][loc][2])
     socketClient.recv_string()
+    socketClient.send_string(Nports[loc%3][loc][2])
     
     #time.sleep(1)
     print ("Reply is sent... ")
@@ -140,8 +140,9 @@ def show(context,LookUpTable,socketClient, username):
     if(arr == ""):
         arr = "You don't have any files, choose upload to add files"
         
-    socketClient.send_string(arr)
     socketClient.recv_string()
+    socketClient.send_string(arr)
+    
     return
 
 ###############################################################################
