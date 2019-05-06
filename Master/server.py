@@ -84,7 +84,7 @@ def success(context, LookUpTable, Nports, loc, socketClient, username, files):
     socketClient.send_string("success")
     state = 'A'
     Nports[loc%3][loc][8] = state
-    print("Nports", Nports[loc%3][i][8])
+    print("Nports", Nports[loc%3][loc][8])
     
     if(succ == 'Success'):
         #TODO call lookup table to add file
