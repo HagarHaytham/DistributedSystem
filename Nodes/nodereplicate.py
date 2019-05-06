@@ -6,7 +6,7 @@ Created on Sat May  4 00:28:29 2019
 """
 import zmq
 import sys
-import time
+#import time
 
 def replicate(port):
     #port = "1100"
@@ -40,7 +40,7 @@ def replicate(port):
             
             print(rSocket.recv_string())
             print("Hey I am sending" , file)
-            time.sleep(5)
+            #time.sleep(5)
             openedFile = open(file,'rb')
             readFile = openedFile.read()
             if(dst1 != ""):
@@ -52,7 +52,7 @@ def replicate(port):
                 dstSocket1.close()
             if(dst2 != ""):
                 dstSocket2 = context.socket(zmq.REQ)
-                dstSocket2.connect("tcp:///%s:%s" % (dIP2,dst2)) 
+                dstSocket2.connect("tcp://%s:%s" % (dIP2,dst2)) 
                 
                 print("sending second copy..." )
                 dstSocket2.send(readFile)
@@ -73,7 +73,7 @@ def replicate(port):
             rSocket.close()
             
         
-#replicate(6000)
+replicate(6000)
 
     
     
