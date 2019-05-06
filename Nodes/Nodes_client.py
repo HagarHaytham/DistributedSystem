@@ -145,7 +145,7 @@ def replicate(context, port):
     return
 
 ########################################################## 
-def main(aliveP, upldP, successP, dwnldP, replServerP)
+def main(aliveP, upldP, successP, dwnldP, replServerP):
 
     context = zmq.Context()
     success = initConn(context, successP)    
@@ -164,10 +164,10 @@ def main(aliveP, upldP, successP, dwnldP, replServerP)
 
     return
 
-if __name__=='__main__':
-    p=[]
-    for i in range(3):
-        p.append(Process(target=main,args=(sys.argv[1],sys.argv[2],sys.argv[3],sys.argv[4],sys.argv[5])))
-        p[i].start()
+# if __name__=='__main__':
+#     p=[]
+#     for i in range(3):
+#         p.append(Process(target=main,args=(sys.argv[1],sys.argv[2],sys.argv[3],sys.argv[4],sys.argv[5])))
+#         p[i].start()
         
 
