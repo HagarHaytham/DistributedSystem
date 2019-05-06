@@ -1,11 +1,14 @@
+import sys
 from multiprocessing import Process, Manager
 from server import main as serverMain
+from replicates import main as repMain
 
 if __name__ == '__main__':
 
 	manager = Manager()
 	lookupTable = manager.dict()
 	Nports = manager.list()
+	files = manager.list()
 
 	lookupTable[0] = [{'':[]}, 'A']
 	lookupTable[1] = [{'':[]}, 'A']
@@ -32,13 +35,13 @@ if __name__ == '__main__':
 
 	print(Nports)
 	#Nports = [[[''], [], []], [[], [], []], [[], [], []]]
-	master1 = Process(target = serverMain, args = (lookupTable, Nports, "3000"))
+	master1 = Process(target = serverMain, args = (lookupTable, Nports, files, "3000"))
 	master1.start()
 	
-	master2 = Process(target = serverMain, args = (lookupTable, Nports, "3100"))
+	master2 = Process(target = serverMain, args = (lookupTable, Nports, files, "3100"))
 	master2.start()
 	
-	master3 = Process(target = serverMain, args = (lookupTable, Nports, "3200"))
+	master3 = Process(target = serverMain, args = (lookupTable, Nports, files, "3200"))
 	master3.start()
 
 
