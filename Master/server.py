@@ -50,14 +50,14 @@ def upld(context, Nports, socketClient, username):
 
     loc = 0
     for i in range(len(Nports)):
-        if Nports[i][6] == 'A':
-            if Nports[i][7] == 'A':
+        if Nports[i][7] == 'A':
+            if Nports[i][8] == 'A':
                 loc = i
-                Nports[i][7] = 'B'
-                print(Nports[loc][1])
+                Nports[i][8] = 'B'
+                print(Nports[loc][2])
                 break
                 
-    socketClient.send_string(Nports[loc][1])
+    socketClient.send_string(Nports[loc][2])
     
     #time.sleep(1)
     print ("Reply is sent... ")
@@ -68,14 +68,14 @@ def upld(context, Nports, socketClient, username):
 def success(context, Nports, loc, socketClient, username):
     
     dataNodeSocket = context.socket(zmq.REP)
-    dataNodeSocket.bind ("tcp://*:%s" % Nports[loc][2])
+    dataNodeSocket.bind ("tcp://*:%s" % Nports[loc][3])
     
     succ, filename = (dataNodeSocket.recv_string()).split()
     print(succ)
     dummy = socketClient.recv_string()
 
     socketClient.send_string("success")
-    Nports[loc][7] = 'A'
+    Nports[loc][8] = 'A'
     
     #if(succ == 'Success'):
         #TODO call lookup table to add file
@@ -166,12 +166,13 @@ def getDwnldList(fileName):
                 
 
 ###############################################################################
-def main(LookUpTable, Nports, dbPort): 
+def main(LookUpTable, Nports, files, dbPort): 
 
     clientThreads = []
     context = zmq.Context()
     socketDB = initConnDB(context, dbPort)
     NodeThread = []
+    print('All', '\n\n')
 
     # for i in range(3):
     #     NodeThread.append(threading.Thread(target=Nodes,args=(context,Nports[:][:][0:1],LookUpTable))) #alivePort
@@ -191,26 +192,24 @@ def main(LookUpTable, Nports, dbPort):
 
     
 
-	# for i in range(len(Nports)):
-
-	#use example of lookup table
-	# temp = temp = Nports[0]
-	# if(dbPort == "3000"):
-	# 	temp[0][0] = "blaaaah"
-		
-	# elif(dbPort == "3001"):
-	# 	temp[0][1] = 'a'
-		
-	# else:
-	# 	temp[0][2] = 'qrrrr'
-		
-	# Nports[0] = temp
-
-	# print('/n/n')
-	# print(Nports[0], Nports[1], Nports[2])
-	# print('/n/n')
-
-
     
 
+# for i in range(len(Nports)):
+
+    #use example of lookup table
+    # temp = temp = Nports[0]
+    # if(dbPort == "3000"):
+    #   temp[0][0] = "blaaaah"
+        
+    # elif(dbPort == "3001"):
+    #   temp[0][1] = 'a'
+        
+    # else:
+    #   temp[0][2] = 'qrrrr'
+        
+    # Nports[0] = temp
+
+    # print('/n/n')
+    # print(Nports[0], Nports[1], Nports[2])
+    # print('/n/n')
 
