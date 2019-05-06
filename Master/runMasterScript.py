@@ -32,10 +32,10 @@ if __name__ == '__main__':
 	master1 = Process(target = serverMain, args = (lookupTable, Nports, "3000"))
 	master1.start()
 	
-	master2 = Process(target = serverMain, args = (lookupTable, Nports, "3001"))
+	master2 = Process(target = serverMain, args = (lookupTable, Nports, "3100"))
 	master2.start()
 	
-	master3 = Process(target = serverMain, args = (lookupTable, Nports, "3002"))
+	master3 = Process(target = serverMain, args = (lookupTable, Nports, "3200"))
 	master3.start()
 
 

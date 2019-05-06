@@ -6,6 +6,7 @@ import ClientF as c
 from multiprocessing import process
 
 
+
 #connect to default port of server from db, connect to this port w send username
 def initConnServer(context, serverPort,ipServer):
     
@@ -105,14 +106,14 @@ def main(IPS,ipServer,dataIps):
                 files = socketID.recv_string()
                 print(files)
 
-            elif(read == "3"):
+            # elif(read == "3"):
 
-                #download happening
-                msg = reqSocket.recv_string()
-                reqSocket.close()
-                dataNodeSockets = initDwnldNodePort(msg)
-                closeDwnld(dataNodeSockets)
-                print ("connecting to process...")
+            #     #download happening
+            #     msg = reqSocket.recv_string()
+            #     reqSocket.close()
+            #     dataNodeSockets = initDwnldNodePort(msg)
+            #     closeDwnld(dataNodeSockets)
+            #     print ("connecting to process...")
     return 
 
 if __name__=='__main__':
